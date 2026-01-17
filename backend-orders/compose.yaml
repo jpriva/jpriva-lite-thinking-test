@@ -1,9 +1,17 @@
 services:
   sqlserver:
-    image: 'mcr.microsoft.com/mssql/server:latest'
+    image: 'mcr.microsoft.com/mssql/server:2022-latest'
+    container_name: sqlserver_container
+    restart: always
     environment:
       - 'ACCEPT_EULA=yes'
-      - 'MSSQL_PID=express'
+      - 'MSSQL_PID=Standard'
       - 'MSSQL_SA_PASSWORD=VeryS3cret!'
+    volumes:
+      - sqlserver_data:/var/opt/mssql/
     ports:
       - '1433:1433'
+
+volumes:
+  sqlserver_data:
+    driver: local

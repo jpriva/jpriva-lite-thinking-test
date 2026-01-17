@@ -1,0 +1,31 @@
+### Config
+@host = http://localhost:8080
+@contentType = application/json
+
+### REGISTER USER
+POST {{host}}/auth/register
+Content-Type: {{contentType}}
+
+{
+    "email": "jpriva9@gmail.com",
+    "password": "S3cr3t!",
+    "fullName": "Juan Pablo Rivadeneira"
+}
+
+### LOGIN USER EXTERNAL
+POST {{host}}/auth/login
+Content-Type: {{contentType}}
+
+{
+    "email": "jpriva9@gmail.com",
+    "password": "S3cr3t!"
+}
+
+### LOGIN USER ADMIN
+POST {{host}}/auth/login
+Content-Type: {{contentType}}
+
+{
+    "email": "jpriva@outlook.com",
+    "password": "S3cr3t!"
+}

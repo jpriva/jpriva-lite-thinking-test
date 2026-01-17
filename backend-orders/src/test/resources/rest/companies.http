@@ -1,0 +1,26 @@
+### Config
+@host = http://localhost:8080
+@contentType = application/json
+@tokenExt = eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJqcHJpdmE5QGdtYWlsLmNvbSIsImlhdCI6MTc2ODY4NjIyNSwiZXhwIjoxNzY4NzcyNjI1fQ.5KUh_eYbu3-Ci4_DcvqnPoiLX-jS6DtAEX13skZOURXq1OLRqIc0YMg9XyNKeIWi
+@tokenAdmin = eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJqcHJpdmFAb3V0bG9vay5jb20iLCJpYXQiOjE3Njg2ODM4NzksImV4cCI6MTc2ODc3MDI3OX0.UHTN5NitrfsUxpRZvDP-wF1ZStCjRlRIRZ8rtH4Sv7b5C80doSeibHbnum3PN-j4
+
+
+### CREATE COMPANY
+POST {{host}}/api/companies
+Content-Type: {{contentType}}
+Authorization: Bearer {{tokenAdmin}}
+
+{
+    "name": "TRYXTEK",
+    "taxId": "900213154-2"
+}
+
+### GET COMPANY
+GET {{host}}/api/companies/900213154-2
+Content-Type: {{contentType}}
+Authorization: Bearer {{tokenExt}}
+
+### GET ALL COMPANIES
+GET {{host}}/api/companies
+Content-Type: {{contentType}}
+Authorization: Bearer {{tokenExt}}

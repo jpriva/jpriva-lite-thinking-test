@@ -5,19 +5,24 @@ spring:
   application:
     name: Orders
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: none
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
   flyway:
     enabled: true
 
 logging:
   level:
     root: INFO
-    org.springframework.web: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.jpriva.orders: DEBUG
 
+jwt:
+  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+  expiration: 86400000
+
+app:
+  default:
+    admin:
+      email: jpriva@outlook.com
+      password: S3cr3t!
+      name: Juan Pablo Rivadeneira

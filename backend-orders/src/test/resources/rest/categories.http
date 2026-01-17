@@ -1,0 +1,27 @@
+### Config
+@host = http://localhost:8080
+@contentType = application/json
+@tokenExt = eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJqcHJpdmFAb3V0bG9vay5jb20iLCJpYXQiOjE3Njg2NzkxODcsImV4cCI6MTc2ODc2NTU4N30.k8q-Z41am0Vuz9JVEzQTTPBtKrsq3SVtTG33dcguHdbdz5XOwclua5Ed8z1aU--i
+@tokenAdmin = eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJqcHJpdmFAb3V0bG9vay5jb20iLCJpYXQiOjE3Njg2ODM4NzksImV4cCI6MTc2ODc3MDI3OX0.UHTN5NitrfsUxpRZvDP-wF1ZStCjRlRIRZ8rtH4Sv7b5C80doSeibHbnum3PN-j4
+
+### CREATE(External) - Error
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{tokenExt}}
+
+{
+    "companyId": "5fcdee2f-2e2b-4446-9ded-67837075b84d",
+    "name": "Category 1",
+    "description": "DESC"
+}
+
+### CREATE(Admin)
+POST {{host}}/api/categories
+Content-Type: {{contentType}}
+Authorization: Bearer {{tokenAdmin}}
+
+{
+    "companyId": "5fcdee2f-2e2b-4446-9ded-67837075b84d",
+    "name": "Category 1",
+    "description": "DESC"
+}
