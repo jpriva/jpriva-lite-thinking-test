@@ -11,6 +11,49 @@ services:
       - sqlserver_data:/var/opt/mssql/
     ports:
       - '1433:1433'
+    healthcheck:
+      test: [ "CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P VeryS3cret! -C -Q 'SELECT 1' || exit 1" ]
+      interval: 10s
+      retries: 10
+      start_period: 10s
+      timeout: 3s
+
+  app-orders:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: orders-container
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    environment:
+      - SERVER_PORT=8080
+      - DB_URL=jdbc:sqlserver://sqlserver:1433;databaseName=master;encrypt=true;trustServerCertificate=true;integratedSecurity=false;authentication=SqlPassword
+      - DB_USERNAME=sa
+      - DB_PASSWORD=VeryS3cret!
+      - HIBERNATE_DDL_AUTO=none
+      - JWT_SECRET=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      - JWT_EXPIRATION=86400000
+      - DEFAULT_ADMIN_EMAIL=jpriva@outlook.com
+      - DEFAULT_ADMIN_PASSWORD=S3cr3t!
+      - DEFAULT_ADMIN_NAME="Juan Pablo Rivadeneira"
+      - APP_LOG_LEVEL:DEBUG
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
+
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: orders-db-init
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    command: >
+      /bin/bash -c "
+      /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P 'VeryS3cret!' -C -Q 'IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = ''orders_dev'') BEGIN CREATE DATABASE orders_dev; END'
+      "
 
 volumes:
   sqlserver_data:
