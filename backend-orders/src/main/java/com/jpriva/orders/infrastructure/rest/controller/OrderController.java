@@ -25,25 +25,18 @@ public class OrderController {
 
     @GetMapping("/{taxId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Page<OrderDto.Response>> getUserOrders(
+    public ResponseEntity<Page<OrderDto.Response>> getOrders(
             @AuthenticationPrincipal UserDetails details,
             @PathVariable String taxId,
             @PageableDefault(page = 0, size = 10, sort = "order_date") Pageable pageable
     ) {
-        return ResponseEntity.ok(manageOrderUseCase.getUserOrders(pageable, details.getUsername(), taxId));
+        return ResponseEntity.ok(manageOrderUseCase.getOrders(pageable, taxId));
     }
 
-    @PostMapping("/user")
-    @PreAuthorize("hasAuthority('ROLE_EXTERNAL')")
-    public ResponseEntity<OrderDto.Response> createOrder(@RequestBody @Valid OrderDto.CreateByUser request) {
-        OrderDto.Response response = manageOrderUseCase.createOrderByUser(request);
-        return ResponseEntity.created(URI.create("/api/orders/" + response.id())).body(response);
-    }
-
-    @PostMapping("/admin")
+    @PostMapping("")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<OrderDto.Response> createOrder(@RequestBody @Valid OrderDto.CreateByAdmin request) {
-        OrderDto.Response response = manageOrderUseCase.createOrderByAdmin(request);
+        OrderDto.Response response = manageOrderUseCase.createOrder(request);
         return ResponseEntity.created(URI.create("/api/orders/" + response.id())).body(response);
     }
 
@@ -54,7 +47,7 @@ public class OrderController {
     }
 
     @PostMapping("/{id}/items")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<OrderDto.Response> addItem(
             @PathVariable UUID id,
             @RequestBody @Valid OrderDto.AddItemRequest request,
@@ -65,7 +58,7 @@ public class OrderController {
     }
 
     @DeleteMapping("/{id}/items/{itemId}")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<OrderDto.Response> removeItem(
             @PathVariable UUID id,
             @PathVariable UUID itemId,

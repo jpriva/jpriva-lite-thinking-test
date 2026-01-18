@@ -33,10 +33,8 @@ CREATE TABLE clients (
     email NVARCHAR(255),
     phone NVARCHAR(50),
     address NVARCHAR(500),
-    user_id UNIQUEIDENTIFIER NOT NULL,
     created_at DATETIME2 DEFAULT GETDATE(),
-    CONSTRAINT FK_Clients_Companies FOREIGN KEY (company_id) REFERENCES companies(id),
-    CONSTRAINT FK_Clients_Users FOREIGN KEY (user_id) REFERENCES users(id)
+    CONSTRAINT FK_Clients_Companies FOREIGN KEY (company_id) REFERENCES companies(id)
 );
 
 CREATE TABLE products (

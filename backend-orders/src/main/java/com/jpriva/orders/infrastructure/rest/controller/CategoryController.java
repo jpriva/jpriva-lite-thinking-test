@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -26,9 +25,9 @@ public class CategoryController {
         return ResponseEntity.created(URI.create("/api/categories/" + response.id())).body(response);
     }
 
-    @GetMapping
+    @GetMapping("/{taxId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<CategoryDto.Response>> getCategoriesByCompany(@RequestParam UUID companyId) {
-        return ResponseEntity.ok(manageCategoryUseCase.getCategoriesByCompany(companyId));
+    public ResponseEntity<List<CategoryDto.Response>> getCategoriesByCompany(@PathVariable String taxId) {
+        return ResponseEntity.ok(manageCategoryUseCase.getCategoriesByCompany(taxId));
     }
 }

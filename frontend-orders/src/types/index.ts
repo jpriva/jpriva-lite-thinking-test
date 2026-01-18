@@ -16,7 +16,6 @@ export interface CreateCategoryRequest {
 export interface Client {
   id: string;
   companyId: string;
-  userId: string;
   name: string;
   email?: string;
   phone?: string;
@@ -26,7 +25,6 @@ export interface Client {
 
 export interface CreateClientRequest {
   companyId: string;
-  userId: string;
   name: string;
   email?: string;
   phone?: string;
@@ -72,13 +70,7 @@ export interface Order {
   items: OrderItem[];
 }
 
-export interface CreateOrderByUserRequest {
-  companyId: string;
-  userId: string;
-  currencyCode: string;
-}
-
-export interface CreateOrderByAdminRequest {
+export interface CreateOrderRequest {
   companyId: string;
   clientId: string;
   currencyCode: string;

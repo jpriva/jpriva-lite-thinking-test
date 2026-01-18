@@ -10,15 +10,12 @@ public record CategoryDto() {
 
     public record CreateRequest(
             @NotNull(message = "Company ID is required")
-            UUID companyId,
+            String companyId,
             @NotBlank(message = "Name is required")
             String name,
             String description
     ) {
-        public Category toDomain() {
-            return Category.create(companyId, name, description);
         }
-    }
 
     public record Response(
             UUID id,

@@ -22,6 +22,8 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import type { Order } from "../types";
 import { OrderService } from "../services/order.service";
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+
 
 export const OrdersPage = () => {
     const { companyId } = useParams();
@@ -33,6 +35,9 @@ export const OrdersPage = () => {
         page: 0,
         pageSize: 10,
     });
+
+    const roles:string | null = localStorage.getItem('role');
+    const isAdmin = roles?.includes('ADMIN');
     const [openModal, setOpenModal] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
@@ -134,6 +139,16 @@ export const OrdersPage = () => {
                     Orders for Company: {companyId}
                 </Typography>
             </Box>
+            {isAdmin &&
+            <Box sx={{ mb: 2, display: 'flex', justifyContent: 'flex-end' }}>
+                <Button
+                    variant="contained"
+                    startIcon={<AddCircleIcon />}
+                    onClick={() => navigate(`/orders/${companyId}/create`)}
+                >
+                    Create New Order
+                </Button>
+            </Box>}
 
             <Paper sx={{ height: 500, width: '100%' }}>
                 <DataGrid

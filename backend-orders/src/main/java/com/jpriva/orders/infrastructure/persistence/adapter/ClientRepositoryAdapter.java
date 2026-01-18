@@ -32,20 +32,10 @@ public class ClientRepositoryAdapter implements ClientRepository {
     }
 
     @Override
-    public Optional<Client> findByCompanyIdAndUserId(UUID companyId, UUID userId) {
-        return jpaRepository.findByCompanyIdAndUserId(companyId, userId).map(ClientMapper::toDomain);
-    }
-
-    @Override
     public List<Client> findByCompanyId(UUID companyId) {
         return jpaRepository.findByCompanyId(companyId).stream()
                 .map(ClientMapper::toDomain)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public Optional<Client> findByUserId(UUID userId) {
-        return jpaRepository.findByUserId(userId).map(ClientMapper::toDomain);
     }
 
     @Override

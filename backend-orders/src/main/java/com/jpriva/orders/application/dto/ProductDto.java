@@ -15,7 +15,7 @@ public record ProductDto() {
 
     public record CreateRequest(
             @NotNull(message = "Company ID is required")
-            UUID companyId,
+            String companyId,
             @NotNull(message = "Category ID is required")
             UUID categoryId,
             @NotBlank(message = "Name is required")
@@ -23,11 +23,7 @@ public record ProductDto() {
             @NotBlank(message = "SKU is required")
             String sku,
             String description
-    ) {
-        public Product toDomain() {
-            return Product.create(companyId, categoryId, name, sku, description);
-        }
-    }
+    ) {}
 
     public record UpdatePriceRequest(
             @NotNull(message = "Price is required")

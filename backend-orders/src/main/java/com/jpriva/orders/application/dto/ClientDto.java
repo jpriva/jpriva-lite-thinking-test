@@ -11,24 +11,17 @@ public record ClientDto() {
 
     public record CreateRequest(
             @NotNull(message = "Company ID is required")
-            UUID companyId,
-            @NotNull(message = "User ID is required")
-            UUID userId,
+            String companyId,
             @NotBlank(message = "Name is required")
             String name,
             String email,
             String phone,
             String address
-    ) {
-        public Client toDomain() {
-            return Client.create(companyId, userId, name, email, phone, address);
-        }
-    }
+    ) {}
 
     public record Response(
             UUID id,
             UUID companyId,
-            UUID userId,
             String name,
             String email,
             String phone,
@@ -39,7 +32,6 @@ public record ClientDto() {
             return new Response(
                     client.getId(),
                     client.getCompanyId(),
-                    client.getUserId(),
                     client.getName(),
                     client.getEmail(),
                     client.getPhone(),

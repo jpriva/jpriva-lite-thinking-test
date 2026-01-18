@@ -13,7 +13,6 @@ public class Client {
 
     private final UUID id;
     private final UUID companyId;
-    private final UUID userId;
     private String name;
     private String email;
     private String phone;
@@ -21,20 +20,16 @@ public class Client {
     private final LocalDateTime createdAt;
 
     @Builder
-    public Client(UUID id, UUID companyId, UUID userId, String name, String email, String phone, String address, LocalDateTime createdAt) {
+    public Client(UUID id, UUID companyId, String name, String email, String phone, String address, LocalDateTime createdAt) {
         if (id == null) {
             throw new DomainException(ClientErrorCodes.CLIENT_ID_NULL);
         }
         if (companyId == null) {
             throw new DomainException(ClientErrorCodes.CLIENT_COMPANY_ID_NULL);
         }
-        if (userId == null) {
-            throw new DomainException(ClientErrorCodes.CLIENT_USER_ID_NULL);
-        }
         
         this.id = id;
         this.companyId = companyId;
-        this.userId = userId;
         this.createdAt = createdAt;
         changeName(name);
         changeEmail(email);
@@ -42,11 +37,10 @@ public class Client {
         changeAddress(address);
     }
 
-    public static Client create(UUID companyId, UUID userId, String name, String email, String phone, String address) {
+    public static Client create(UUID companyId, String name, String email, String phone, String address) {
         return Client.builder()
                 .id(UUID.randomUUID())
                 .companyId(companyId)
-                .userId(userId)
                 .name(name)
                 .email(email)
                 .phone(phone)
@@ -55,12 +49,11 @@ public class Client {
                 .build();
     }
 
-    public static Client fromPersistence(UUID id, UUID companyId, UUID userId, String name, String email, String phone, String address, LocalDateTime createdAt) {
+    public static Client fromPersistence(UUID id, UUID companyId, String name, String email, String phone, String address, LocalDateTime createdAt) {
         try {
             return Client.builder()
                     .id(id)
                     .companyId(companyId)
-                    .userId(userId)
                     .name(name)
                     .email(email)
                     .phone(phone)

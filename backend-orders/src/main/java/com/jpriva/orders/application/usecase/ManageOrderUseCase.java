@@ -31,46 +31,16 @@ public class ManageOrderUseCase {
     private final CompanyRepository companyRepository;
 
     @Transactional(readOnly = true)
-    public Page<OrderDto.Response> getUserOrders(Pageable pageable, String email, String taxId){
-        User user = userRepository.findByEmail(email).orElseThrow(()->new DomainException(UserErrorCodes.USER_NOT_FOUND));
+    public Page<OrderDto.Response> getOrders(Pageable pageable, String taxId){
         Company company = companyRepository.findByTaxId(taxId).orElseThrow(()->new DomainException(CompanyErrorCodes.COMPANY_NOT_FOUND));
-        if (user.getRole() == Role.ADMIN){
-            return orderRepository.findByCompanyId(pageable,company.getId()).map(OrderDto.Response::fromDomain);
-        }
-        Optional<Client> client = clientRepository.findByUserId(user.getId());
 
-        return client.map(value ->
-                orderRepository.findByClientIdAndCompanyId(value.getId(), company.getId(), pageable)
-                        .map(OrderDto.Response::fromDomain)
-        ).orElseGet(() -> Page.empty(pageable));
+        return orderRepository.findByCompanyId(pageable, company.getId())
+                        .map(OrderDto.Response::fromDomain);
 
     }
 
     @Transactional
-    public OrderDto.Response createOrderByUser(OrderDto.CreateByUser request) {
-        Currency currency = Currency.valueOf(request.currencyCode());
-
-        Company company = companyRepository.findById(request.companyId())
-                .orElseThrow(()->new DomainException(CompanyErrorCodes.COMPANY_NOT_FOUND));
-        User user = userRepository.findById(request.userId())
-                .orElseThrow(()->new DomainException(UserErrorCodes.USER_NOT_FOUND));
-
-        Optional<Client> clientOpt = clientRepository.findByCompanyIdAndUserId(company.getId(),user.getId());
-        Client client;
-        if (clientOpt.isEmpty()){
-            client = Client.create(company.getId(), user.getId(), user.getFullName(), user.getEmail(), user.getPhone(), user.getAddress());
-            clientRepository.save(client);
-        } else {
-            client = clientOpt.get();
-        }
-
-        Order order = Order.create(company.getId(), client.getId(), client.getName(), client.getAddress(), currency);
-
-        Order savedOrder = orderRepository.save(order);
-        return OrderDto.Response.fromDomain(savedOrder);
-    }
-    @Transactional
-    public OrderDto.Response createOrderByAdmin(OrderDto.CreateByAdmin request) {
+    public OrderDto.Response createOrder(OrderDto.CreateByAdmin request) {
         Currency currency = Currency.valueOf(request.currencyCode());
 
         Company company = companyRepository.findById(request.companyId())
@@ -89,7 +59,6 @@ public class ManageOrderUseCase {
     public OrderDto.Response addItem(UUID orderId, OrderDto.AddItemRequest request, String email) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new DomainException(OrderErrorCodes.ORDER_NOT_FOUND));
-        getOrderAccess(email, order);
 
         if (order.getStatus() != OrderStatus.PENDING){
             throw new DomainException(OrderErrorCodes.ORDER_STATUS_NOT_PENDING);
@@ -128,7 +97,6 @@ public class ManageOrderUseCase {
     public OrderDto.Response removeItem(UUID orderId, UUID itemId, String email) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new DomainException(OrderErrorCodes.ORDER_NOT_FOUND));
-        getOrderAccess(email, order);
 
         order.removeItem(itemId);
 
@@ -136,21 +104,10 @@ public class ManageOrderUseCase {
         return OrderDto.Response.fromDomain(savedOrder);
     }
 
-    private void getOrderAccess(String email, Order order){
-        User user = userRepository.findByEmail(email).orElseThrow(()->new DomainException(UserErrorCodes.USER_NOT_FOUND));
-        if (user.getRole() == Role.EXTERNAL){
-            Client client = clientRepository.findByUserId(user.getId()).orElseThrow(()->new DomainException(ClientErrorCodes.CLIENT_NOT_FOUND));
-            if (!order.getClientId().equals(client.getId())){
-                throw new DomainException(OrderErrorCodes.ORDER_NOT_ALLOWED);
-            }
-        }
-    }
-
     @Transactional(readOnly = true)
     public OrderDto.Response getOrder(UUID id, String email) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new DomainException(OrderErrorCodes.ORDER_NOT_FOUND));
-        getOrderAccess(email, order);
         order.changeStatus(OrderStatus.CONFIRMED);
         order = orderRepository.save(order);
         return OrderDto.Response.fromDomain(order);
@@ -160,7 +117,6 @@ public class ManageOrderUseCase {
     public OrderDto.Response confirmOrder(UUID id, String email) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new DomainException(OrderErrorCodes.ORDER_NOT_FOUND));
-        getOrderAccess(email, order);
         if (order.getStatus() != OrderStatus.PENDING){
             throw new DomainException(OrderErrorCodes.ORDER_STATUS_NOT_PENDING);
         }
@@ -180,7 +136,6 @@ public class ManageOrderUseCase {
     public OrderDto.Response cancelOrder(UUID orderId, String email){
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new DomainException(OrderErrorCodes.ORDER_NOT_FOUND));
-        getOrderAccess(email, order);
         if (order.getStatus() == OrderStatus.CANCELLED){
             return OrderDto.Response.fromDomain(order);
         }

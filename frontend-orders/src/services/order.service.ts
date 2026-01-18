@@ -1,5 +1,5 @@
 import axiosClient from '../api/axiosClient';
-import type {Page, Order, CreateOrderByUserRequest} from '../types';
+import type {Page, Order, CreateOrderRequest} from '../types';
 
 export const OrderService = {
 
@@ -13,12 +13,7 @@ export const OrderService = {
         return data;
     },
 
-    createUser: async (payload: CreateOrderByUserRequest) => {
-        const { data } = await axiosClient.post<Order>('/api/orders/user', payload);
-        return data;
-    },
-
-    createAdmin: async (payload: CreateOrderByUserRequest) => {
+    create: async (payload: CreateOrderRequest) => {
         const { data } = await axiosClient.post<Order>('/api/orders/admin', payload);
         return data;
     },

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -23,9 +24,14 @@ public class ProductController {
         return ResponseEntity.created(URI.create("/api/products/" + response.id())).body(response);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/product/{id}")
     public ResponseEntity<ProductDto.Response> getProduct(@PathVariable UUID id) {
         return ResponseEntity.ok(manageProductUseCase.getProduct(id));
+    }
+
+    @GetMapping("/{taxId}")
+    public ResponseEntity<List<ProductDto.Response>> getProduct(@PathVariable String taxId) {
+        return ResponseEntity.ok(manageProductUseCase.getAllProduct(taxId));
     }
 
     @PutMapping("/{id}/price")

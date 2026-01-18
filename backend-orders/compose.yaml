@@ -41,19 +41,6 @@ services:
     depends_on:
       sqlserver:
         condition: service_healthy
-      db-init:
-        condition: service_completed_successfully
-
-  db-init:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: orders-db-init
-    depends_on:
-      sqlserver:
-        condition: service_healthy
-    command: >
-      /bin/bash -c "
-      /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P 'VeryS3cret!' -C -Q 'IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = ''orders_dev'') BEGIN CREATE DATABASE orders_dev; END'
-      "
 
 volumes:
   sqlserver_data:

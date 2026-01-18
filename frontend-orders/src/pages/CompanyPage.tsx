@@ -25,7 +25,7 @@ export const CompanyPage = () => {
     const navigate = useNavigate();
     const [rows, setRows] = useState<Company[]>([]);
     const [loading, setLoading] = useState(true);
-    const roles:string | null = localStorage.getItem('roles');
+    const roles:string | null = localStorage.getItem('role');
     const isAdmin = roles?.includes('ADMIN');
 
     const [open, setOpen] = useState(false);
@@ -50,7 +50,7 @@ export const CompanyPage = () => {
     };
 
     useEffect(() => {
-        fetchCompanies();
+        void fetchCompanies();
     }, []);
 
     const handleOpen = () => setOpen(true);
@@ -104,7 +104,7 @@ export const CompanyPage = () => {
                     }
                 }}
                 initialState={{
-                    pagination: { paginationModel: { pageSize: 10 } },
+                    pagination: { paginationModel: { pageSize: 100 } },
                 }}
                 pageSizeOptions={[5, 10]}
                 disableRowSelectionOnClick

@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -25,11 +26,17 @@ public class ClientController {
         return ResponseEntity.created(URI.create("/api/clients/" + response.id())).body(response);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/client/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ClientDto.Response> getClient(@PathVariable UUID id) {
         return manageClientUseCase.getClient(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{taxId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<List<ClientDto.Response>> getClientsByCompany(@PathVariable String taxId) {
+        return ResponseEntity.ok(manageClientUseCase.getClientsByCompany(taxId).stream().toList());
     }
 }
