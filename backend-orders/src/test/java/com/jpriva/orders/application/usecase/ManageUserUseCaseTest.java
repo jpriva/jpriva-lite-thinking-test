@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 class ManageUserUseCaseTest {
@@ -108,7 +110,7 @@ class ManageUserUseCaseTest {
                 .build();
         when(userRepository.findByEmail(loginRequest.email())).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("password123", "encodedPassword")).thenReturn(true);
-        when(jwtService.generateToken(any(User.class))).thenReturn("fake.jwt.token");
+        lenient().when(jwtService.generateToken(any(Map.class), any(User.class))).thenReturn("fake.jwt.token");
 
         UserDto.TokenResponse result = manageUserUseCase.loginUser(loginRequest);
 

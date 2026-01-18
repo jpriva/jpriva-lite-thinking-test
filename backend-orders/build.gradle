@@ -70,7 +70,7 @@ test {
 
 		exceptionFormat = "full"
 
-		showStandardStreams = false
+		showStandardStreams = true
 	}
 
 	afterSuite { desc, result ->

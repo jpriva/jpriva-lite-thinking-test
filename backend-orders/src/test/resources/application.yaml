@@ -1,0 +1,14 @@
+jwt:
+  secret: "dGhpc2lzYWxvbmdlcmp3dHNlY3JldGtleWZvcnNlY3VyaXR5cHVycG9zZXN0aGF0aXNhdGxlYXN0MzJieXRlc2xvbmc="
+  expiration: 86400000
+
+app:
+  default:
+    admin:
+      email: "admin@test.com"
+      password: "password"
+      name: "Test Admin"
+
+spring:
+  flyway:
+    enabled: true

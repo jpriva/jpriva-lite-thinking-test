@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.ObjectMapper;
@@ -18,12 +19,14 @@ import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(TestcontainersConfiguration.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class OrderControllerIntegrationTest {
 
     @Autowired
@@ -35,6 +38,7 @@ class OrderControllerIntegrationTest {
     private String adminToken;
     private UUID companyId;
     private UUID clientId;
+    private CompanyDto.CreateRequest companyRequest;
 
     @BeforeEach
     void setup() throws Exception {
@@ -49,6 +53,7 @@ class OrderControllerIntegrationTest {
         MvcResult registerResult = mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(adminUserRequest)))
+                .andDo(print())
                 .andExpect(status().isCreated())
                 .andReturn();
         UUID adminUserId = UUID.fromString(objectMapper.readTree(registerResult.getResponse().getContentAsString()).get("id").asString());
@@ -60,12 +65,13 @@ class OrderControllerIntegrationTest {
         MvcResult loginResult = mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(adminLoginRequest)))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
         adminToken = objectMapper.readTree(loginResult.getResponse().getContentAsString()).get("accessToken").asString();
 
         // 2. Create Company
-        CompanyDto.CreateRequest companyRequest = new CompanyDto.CreateRequest(
+        companyRequest = new CompanyDto.CreateRequest(
                 "Test Company for Order",
                 "123456789-0",
                 "Company Address",
@@ -75,12 +81,13 @@ class OrderControllerIntegrationTest {
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(companyRequest)))
+                .andDo(print())
                 .andExpect(status().isCreated())
                 .andReturn();
         companyId = UUID.fromString(objectMapper.readTree(companyResult.getResponse().getContentAsString()).get("id").asString());
 
         CategoryDto.CreateRequest categoryRequest = new CategoryDto.CreateRequest(
-                companyId,
+                companyRequest.taxId(),
                 "Test Category for Order",
                 "Description for Order Category"
         );
@@ -88,12 +95,13 @@ class OrderControllerIntegrationTest {
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(categoryRequest)))
+                .andDo(print())
                 .andExpect(status().isCreated())
                 .andReturn();
         UUID categoryId = UUID.fromString(objectMapper.readTree(categoryResult.getResponse().getContentAsString()).get("id").asString());
 
         ProductDto.CreateRequest productRequest = new ProductDto.CreateRequest(
-                companyId,
+                companyRequest.taxId(),
                 categoryId,
                 "Test Product for Order",
                 "PROD-ORDER-001",
@@ -103,6 +111,7 @@ class OrderControllerIntegrationTest {
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(productRequest)))
+                .andDo(print())
                 .andExpect(status().isCreated())
                 .andReturn();
         UUID productId = UUID.fromString(objectMapper.readTree(productResult.getResponse().getContentAsString()).get("id").asString());
@@ -112,11 +121,11 @@ class OrderControllerIntegrationTest {
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatePriceRequest)))
+                .andDo(print())
                 .andExpect(status().isOk());
 
         ClientDto.CreateRequest clientRequest = new ClientDto.CreateRequest(
-                companyId,
-                adminUserId,
+                companyRequest.taxId(),
                 "Test Client for Order",
                 "client.order@example.com",
                 "5554443332",
@@ -126,6 +135,7 @@ class OrderControllerIntegrationTest {
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(clientRequest)))
+                .andDo(print())
                 .andExpect(status().isCreated())
                 .andReturn();
         clientId = UUID.fromString(objectMapper.readTree(clientResult.getResponse().getContentAsString()).get("id").asString());
@@ -135,13 +145,13 @@ class OrderControllerIntegrationTest {
     void shouldCreateOrderByAdminSuccessfully() throws Exception {
         // Arrange
         OrderDto.CreateRequest orderRequest = new OrderDto.CreateRequest(
-                companyId,
+                companyRequest.taxId(),
                 clientId,
                 "USD"
         );
         String orderJson = objectMapper.writeValueAsString(orderRequest);
 
-        mockMvc.perform(post("/api/orders/admin")
+        mockMvc.perform(post("/api/orders")
                         .header("Authorization", "Bearer " + adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(orderJson))

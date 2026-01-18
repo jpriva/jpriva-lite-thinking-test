@@ -13,16 +13,14 @@ class ClientTest {
     @Test
     void shouldCreateClientSuccessfully() {
         UUID companyId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
         String name = "John Client";
         String email = "john@client.com";
 
-        Client client = Client.create(companyId, userId, name, email, "555-1234", "St 1");
+        Client client = Client.create(companyId, name, email, "555-1234", "St 1");
 
         assertNotNull(client);
         assertNotNull(client.getId());
         assertEquals(companyId, client.getCompanyId());
-        assertEquals(userId, client.getUserId());
         assertEquals(name, client.getName());
         assertEquals(email, client.getEmail());
     }
@@ -31,29 +29,17 @@ class ClientTest {
     void shouldThrowExceptionWhenCreatingClientWithNullCompanyId() {
         DomainException exception = assertThrows(DomainException.class, () -> Client.builder()
                 .id(UUID.randomUUID())
-                .userId(UUID.randomUUID())
                 .name("Name")
                 .build()
         );
         assertEquals(ClientErrorCodes.CLIENT_COMPANY_ID_NULL.getCode(), exception.getCode());
     }
 
-    @Test
-    void shouldThrowExceptionWhenCreatingClientWithNullUserId() {
-        DomainException exception = assertThrows(DomainException.class, () -> Client.create(
-                UUID.randomUUID(),
-                null,
-                "Name",
-                "Email",
-                "Phone",
-                "Addr"
-        ));
-        assertEquals(ClientErrorCodes.CLIENT_USER_ID_NULL.getCode(), exception.getCode());
-    }
+
 
     @Test
     void shouldUpdateClientDetails() {
-        Client client = Client.create(UUID.randomUUID(), UUID.randomUUID(), "Old Name", "old@mail.com", "1", "1");
+        Client client = Client.create(UUID.randomUUID(), "Old Name", "old@mail.com", "1", "1");
 
         client.changeName("New Name");
         client.changeEmail("new@mail.com");

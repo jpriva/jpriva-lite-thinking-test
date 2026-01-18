@@ -6,6 +6,7 @@ import com.jpriva.orders.domain.exceptions.ProductErrorCodes;
 import com.jpriva.orders.domain.model.Company;
 import com.jpriva.orders.domain.model.Product;
 import com.jpriva.orders.domain.ports.repository.ProductRepository;
+import com.jpriva.orders.domain.ports.repository.CompanyRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,14 +30,18 @@ class ManageProductUseCaseTest {
     @Mock
     private ProductRepository productRepository;
 
+    @Mock
+    private CompanyRepository companyRepository;
+
     @InjectMocks
     private ManageProductUseCase manageProductUseCase;
 
     private ProductDto.CreateRequest request;
+    private Company testCompany;
 
     @BeforeEach
     void setUp() {
-        Company testCompany = Company.builder()
+        testCompany = Company.builder()
                 .id(UUID.randomUUID())
                 .name("TestCo")
                 .taxId("T1")
@@ -45,7 +50,7 @@ class ManageProductUseCaseTest {
                 .build();
 
         request = new ProductDto.CreateRequest(
-                testCompany.getId(),
+                testCompany.getTaxId(),
                 UUID.randomUUID(), // categoryId
                 "New Product",
                 "SKU-NEW",
@@ -55,6 +60,7 @@ class ManageProductUseCaseTest {
 
     @Test
     void createProduct_shouldCreateAndSaveProduct() {
+        when(companyRepository.findByTaxId(any(String.class))).thenReturn(java.util.Optional.of(testCompany));
         when(productRepository.save(any(Product.class))).thenAnswer(inv -> inv.getArgument(0));
 
         ProductDto.Response result = manageProductUseCase.createProduct(request);
@@ -67,7 +73,7 @@ class ManageProductUseCaseTest {
 
     @Test
     void getProduct_shouldReturnProduct_whenFound() {
-        Product product = request.toDomain(); // Create a product from the request
+        Product product = Product.create(testCompany.getId(), request.categoryId(), request.name(), request.sku(), request.description());
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
         ProductDto.Response result = manageProductUseCase.getProduct(product.getId());
@@ -92,7 +98,7 @@ class ManageProductUseCaseTest {
 
     @Test
     void updatePrice_shouldUpdateProductPrice() {
-        Product product = request.toDomain();
+        Product product = Product.create(testCompany.getId(), request.categoryId(), request.name(), request.sku(), request.description());
         ProductDto.UpdatePriceRequest updateRequest = new ProductDto.UpdatePriceRequest(BigDecimal.valueOf(15.00), "USD");
 
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
@@ -122,7 +128,7 @@ class ManageProductUseCaseTest {
 
     @Test
     void increaseStock_shouldIncreaseProductStock() {
-        Product product = request.toDomain();
+        Product product = Product.create(testCompany.getId(), request.categoryId(), request.name(), request.sku(), request.description());
         int initialStock = product.getInventory().getQuantity();
         int amountToIncrease = 10;
 
@@ -151,7 +157,7 @@ class ManageProductUseCaseTest {
 
     @Test
     void increaseStock_shouldThrowException_whenAmountIsZeroOrNegative() {
-        Product product = request.toDomain();
+        Product product = Product.create(testCompany.getId(), request.categoryId(), request.name(), request.sku(), request.description());
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
         DomainException ex = catchThrowableOfType(

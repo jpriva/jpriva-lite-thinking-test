@@ -3,6 +3,7 @@ package com.jpriva.orders.application.usecase;
 import com.jpriva.orders.application.dto.ClientDto;
 import com.jpriva.orders.domain.model.Client;
 import com.jpriva.orders.domain.ports.repository.ClientRepository;
+import com.jpriva.orders.domain.ports.repository.CompanyRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,23 +19,36 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.jpriva.orders.domain.model.Company;
+
 @ExtendWith(MockitoExtension.class)
 class ManageClientUseCaseTest {
 
     @Mock
     private ClientRepository clientRepository;
 
+    @Mock
+    private CompanyRepository companyRepository;
+
     @InjectMocks
     private ManageClientUseCase manageClientUseCase;
 
     private ClientDto.CreateRequest createRequest;
     private Client client;
+    private Company testCompany;
 
     @BeforeEach
     void setUp() {
+        testCompany = Company.builder()
+                .id(UUID.randomUUID())
+                .name("TestCo")
+                .taxId("T1")
+                .address("Comp Address")
+                .phone("123")
+                .build();
+
         createRequest = new ClientDto.CreateRequest(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
+                testCompany.getTaxId(),
                 "Test Client",
                 "client@example.com",
                 "987654321",
@@ -43,8 +57,7 @@ class ManageClientUseCaseTest {
 
         client = Client.builder()
                 .id(UUID.randomUUID())
-                .companyId(createRequest.companyId())
-                .userId(createRequest.userId())
+                .companyId(testCompany.getId())
                 .name(createRequest.name())
                 .email(createRequest.email())
                 .phone(createRequest.phone())
@@ -54,6 +67,7 @@ class ManageClientUseCaseTest {
 
     @Test
     void createClient_shouldSaveClient() {
+        when(companyRepository.findByTaxId(any(String.class))).thenReturn(java.util.Optional.of(testCompany));
         when(clientRepository.save(any(Client.class))).thenReturn(client);
 
         ClientDto.Response result = manageClientUseCase.createClient(createRequest);
