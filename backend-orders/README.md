@@ -109,3 +109,121 @@ docker run -p 8080:8080 backend-orders
 ```
 
 Esto levantará la aplicación en el puerto 8080.
+
+## Base de datos
+
+@startuml Database_Schema
+
+!define primary_key(x) <b><color:#b8861b><&key></color> x</b>
+!define foreign_key(x) <color:#aaaaaa><&key></color> x
+!define column(x) <color:#efefef><&media-record></color> x
+!define table(x) entity x << (T, white) >>
+
+entity "companies" as companies {
+primary_key(id): UNIQUEIDENTIFIER
+--
+column(name): NVARCHAR(255) NOT NULL
+column(tax_id): NVARCHAR(50) NOT NULL UNIQUE
+column(address): NVARCHAR(500)
+column(phone): NVARCHAR(50)
+column(created_at): DATETIME2
+}
+
+entity "users" as users {
+primary_key(id): UNIQUEIDENTIFIER
+--
+column(email): NVARCHAR(255) NOT NULL UNIQUE
+column(password_hash): NVARCHAR(255) NOT NULL
+column(full_name): NVARCHAR(255) NOT NULL
+column(phone): NVARCHAR(50)
+column(address): NVARCHAR(500)
+column(role): NVARCHAR(50) NOT NULL
+column(created_at): DATETIME2
+}
+
+entity "categories" as categories {
+primary_key(id): UNIQUEIDENTIFIER
+--
+foreign_key(company_id): UNIQUEIDENTIFIER NOT NULL
+column(name): NVARCHAR(100) NOT NULL
+column(description): NVARCHAR(500)
+}
+
+entity "clients" as clients {
+primary_key(id): UNIQUEIDENTIFIER
+--
+foreign_key(company_id): UNIQUEIDENTIFIER NOT NULL
+column(name): NVARCHAR(255) NOT NULL
+column(email): NVARCHAR(255)
+column(phone): NVARCHAR(50)
+column(address): NVARCHAR(500)
+column(created_at): DATETIME2
+}
+
+entity "products" as products {
+primary_key(id): UNIQUEIDENTIFIER
+--
+foreign_key(company_id): UNIQUEIDENTIFIER NOT NULL
+foreign_key(category_id): UNIQUEIDENTIFIER
+column(name): NVARCHAR(255) NOT NULL
+column(sku): NVARCHAR(100) NOT NULL
+column(description): NVARCHAR(MAX)
+column(created_at): DATETIME2
+}
+
+entity "inventory" as inventory {
+primary_key(id): UNIQUEIDENTIFIER
+--
+foreign_key(product_id): UNIQUEIDENTIFIER NOT NULL
+column(quantity): INT NOT NULL
+column(last_updated): DATETIME2
+}
+
+entity "product_prices" as product_prices {
+primary_key(id): UNIQUEIDENTIFIER
+--
+foreign_key(product_id): UNIQUEIDENTIFIER NOT NULL
+column(currency_code): NVARCHAR(3) NOT NULL
+column(price): DECIMAL(18, 2) NOT NULL
+}
+
+entity "orders" as orders {
+primary_key(id): UNIQUEIDENTIFIER
+--
+foreign_key(company_id): UNIQUEIDENTIFIER NOT NULL
+foreign_key(client_id): UNIQUEIDENTIFIER NOT NULL
+column(client_name): NVARCHAR(255) NOT NULL
+column(address): NVARCHAR(500) NOT NULL
+column(order_date): DATETIME2 NOT NULL
+column(status): NVARCHAR(50) NOT NULL
+column(currency_code): NVARCHAR(3) NOT NULL
+column(total_amount): DECIMAL(18, 2) NOT NULL
+}
+
+entity "order_items" as order_items {
+primary_key(id): UNIQUEIDENTIFIER
+--
+foreign_key(order_id): UNIQUEIDENTIFIER NOT NULL
+foreign_key(product_id): UNIQUEIDENTIFIER NOT NULL
+column(product_name): NVARCHAR(255) NOT NULL
+column(quantity): INT NOT NULL
+column(unit_price): DECIMAL(18, 2) NOT NULL
+}
+
+' Relationships
+companies ||--o{ categories : "has"
+companies ||--o{ clients : "has"
+companies ||--o{ products : "has"
+companies ||--o{ orders : "has"
+
+categories ||--o{ products : "categorizes"
+
+products ||--|| inventory : "has"
+products ||--o{ product_prices : "has"
+products ||--o{ order_items : "contains"
+
+clients ||--o{ orders : "places"
+
+orders ||--o{ order_items : "contains"
+
+@enduml
