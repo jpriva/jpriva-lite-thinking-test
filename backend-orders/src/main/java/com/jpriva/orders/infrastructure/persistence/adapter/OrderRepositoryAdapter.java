@@ -6,6 +6,8 @@ import com.jpriva.orders.infrastructure.persistence.entity.OrderEntity;
 import com.jpriva.orders.infrastructure.persistence.mapper.OrderMapper;
 import com.jpriva.orders.infrastructure.persistence.repository.OrderJpaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -39,17 +41,14 @@ public class OrderRepositoryAdapter implements OrderRepository {
     }
 
     @Override
-    public List<Order> findByCompanyId(UUID companyId) {
-        return jpaRepository.findByCompanyId(companyId).stream()
-                .map(OrderMapper::toDomain)
-                .collect(Collectors.toList());
+    public Page<Order> findByCompanyId(Pageable pageable, UUID companyId) {
+        return jpaRepository.findByCompanyId(companyId, pageable)
+                .map(OrderMapper::toDomain);
     }
 
     @Override
-    public List<Order> findByClientId(UUID clientId) {
-        return jpaRepository.findByClientId(clientId).stream()
-                .map(OrderMapper::toDomain)
-                .collect(Collectors.toList());
+    public Page<Order> findByClientIdAndCompanyId(UUID clientId, UUID companyId, Pageable pageable) {
+        return jpaRepository.findByClientIdAndCompanyId(clientId, companyId, pageable).map(OrderMapper::toDomain);
     }
 
     @Override

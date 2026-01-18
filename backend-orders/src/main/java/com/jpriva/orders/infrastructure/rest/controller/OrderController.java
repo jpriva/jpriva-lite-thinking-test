@@ -4,6 +4,9 @@ import com.jpriva.orders.application.dto.OrderDto;
 import com.jpriva.orders.application.usecase.ManageOrderUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,6 +22,16 @@ import java.util.UUID;
 public class OrderController {
 
     private final ManageOrderUseCase manageOrderUseCase;
+
+    @GetMapping("/{taxId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Page<OrderDto.Response>> getUserOrders(
+            @AuthenticationPrincipal UserDetails details,
+            @PathVariable String taxId,
+            @PageableDefault(page = 0, size = 10, sort = "order_date") Pageable pageable
+    ) {
+        return ResponseEntity.ok(manageOrderUseCase.getUserOrders(pageable, details.getUsername(), taxId));
+    }
 
     @PostMapping("/user")
     @PreAuthorize("hasAuthority('ROLE_EXTERNAL')")

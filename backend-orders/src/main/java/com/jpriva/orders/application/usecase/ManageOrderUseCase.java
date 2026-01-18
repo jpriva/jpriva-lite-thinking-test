@@ -8,6 +8,8 @@ import com.jpriva.orders.domain.model.vo.OrderStatus;
 import com.jpriva.orders.domain.model.vo.Role;
 import com.jpriva.orders.domain.ports.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,21 @@ public class ManageOrderUseCase {
     private final ClientRepository clientRepository;
     private final CompanyRepository companyRepository;
 
+    @Transactional(readOnly = true)
+    public Page<OrderDto.Response> getUserOrders(Pageable pageable, String email, String taxId){
+        User user = userRepository.findByEmail(email).orElseThrow(()->new DomainException(UserErrorCodes.USER_NOT_FOUND));
+        Company company = companyRepository.findByTaxId(taxId).orElseThrow(()->new DomainException(CompanyErrorCodes.COMPANY_NOT_FOUND));
+        if (user.getRole() == Role.ADMIN){
+            return orderRepository.findByCompanyId(pageable,company.getId()).map(OrderDto.Response::fromDomain);
+        }
+        Optional<Client> client = clientRepository.findByUserId(user.getId());
+
+        return client.map(value ->
+                orderRepository.findByClientIdAndCompanyId(value.getId(), company.getId(), pageable)
+                        .map(OrderDto.Response::fromDomain)
+        ).orElseGet(() -> Page.empty(pageable));
+
+    }
 
     @Transactional
     public OrderDto.Response createOrderByUser(OrderDto.CreateByUser request) {

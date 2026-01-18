@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -57,7 +59,9 @@ public class ManageUserUseCase {
             throw new DomainException(UserErrorCodes.USER_CREDENTIALS_INVALID);
         }
 
-        String token = jwtService.generateToken(user);
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("roles", user.getRole().name());
+        String token = jwtService.generateToken(extraClaims, user);
         return new UserDto.TokenResponse(token, "Bearer", jwtExpiration, Instant.now().toEpochMilli());
     }
 }
