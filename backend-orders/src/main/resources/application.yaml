@@ -1,28 +1,36 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 spring:
   application:
     name: Orders
+  datasource:
+    url: ${DB_URL:jdbc:sqlserver://localhost:1433;databaseName=orders;encrypt=true;trustServerCertificate=true}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: none
+      ddl-auto: ${HIBERNATE_DDL_AUTO:validate}
   flyway:
     enabled: true
+    url: ${DB_URL:jdbc:sqlserver://localhost:1433;databaseName=orders;encrypt=true;trustServerCertificate=true}
+    user: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
 logging:
   level:
     root: INFO
-    com.jpriva.orders: DEBUG
+    com.jpriva.orders: ${APP_LOG_LEVEL:INFO}
 
 jwt:
-  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-  expiration: 86400000
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION:86400000}
 
 app:
   default:
     admin:
-      email: jpriva@outlook.com
-      password: S3cr3t!
-      name: Juan Pablo Rivadeneira
+      email: ${DEFAULT_ADMIN_EMAIL}
+      password: ${DEFAULT_ADMIN_PASSWORD}
+      name: ${DEFAULT_ADMIN_NAME:Admin}

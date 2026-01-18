@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.tasks.aot.ProcessTestAot
+
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '4.0.1'
@@ -48,8 +50,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-flyway-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
 	testImplementation 'org.testcontainers:testcontainers-mssqlserver'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -61,6 +64,29 @@ hibernate {
 	}
 }
 
-tasks.named('test') {
+test {
+	testLogging {
+		events "failed", "skipped"
+
+		exceptionFormat = "full"
+
+		showStandardStreams = false
+	}
+
+	afterSuite { desc, result ->
+		if (!desc.parent) {
+			println "\n=========================================================="
+			println "RESULTADOS DEL TEST: ${result.resultType}"
+			println "Total: ${result.testCount}"
+			println "Pasaron: ${result.successfulTestCount} (✅)"
+			println "Fallaron: ${result.failedTestCount} (❌)"
+			println "Saltados: ${result.skippedTestCount} (⚠️)"
+			println "==========================================================\n"
+		}
+	}
 	useJUnitPlatform()
+}
+
+tasks.withType(ProcessTestAot).configureEach {
+	enabled = false
 }

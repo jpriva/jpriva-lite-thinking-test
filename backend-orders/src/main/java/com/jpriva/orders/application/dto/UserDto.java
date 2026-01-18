@@ -19,10 +19,11 @@ public record UserDto() {
             @NotBlank(message = "Full Name is required")
             String fullName,
             String phone,
-            String address
+            String address,
+            String role
     ) {
         public User toDomain(String passwordHashed) {
-            return User.create(email, passwordHashed, fullName, phone, address, Role.EXTERNAL);
+            return User.create(email, passwordHashed, fullName, phone, address, Role.valueOf(role));
         }
     }
 

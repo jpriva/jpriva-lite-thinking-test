@@ -7,12 +7,17 @@ import org.testcontainers.mssqlserver.MSSQLServerContainer;
 import org.testcontainers.utility.DockerImageName;
 
 @TestConfiguration(proxyBeanMethods = false)
-class TestcontainersConfiguration {
+public class TestcontainersConfiguration {
 
-	@Bean
-	@ServiceConnection
-	MSSQLServerContainer sqlServerContainer() {
-		return new MSSQLServerContainer(DockerImageName.parse("mcr.microsoft.com/mssql/server:latest"));
-	}
+    @Bean
+    @ServiceConnection
+    MSSQLServerContainer sqlServerContainer() {
+        return new MSSQLServerContainer(
+                DockerImageName
+                        .parse("mcr.microsoft.com/mssql/server:2022-latest")
+        )
+                .acceptLicense()
+                .withReuse(true);
+    }
 
 }

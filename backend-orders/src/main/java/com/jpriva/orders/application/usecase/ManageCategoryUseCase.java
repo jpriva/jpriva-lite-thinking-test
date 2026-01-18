@@ -23,7 +23,7 @@ public class ManageCategoryUseCase {
 
     @Transactional
     public CategoryDto.Response createCategory(CategoryDto.CreateRequest request) {
-        if (companyRepository.existsById(request.companyId())){
+        if (!companyRepository.existsById(request.companyId())){
             throw new DomainException(CompanyErrorCodes.COMPANY_NOT_FOUND);
         }
         Category category = request.toDomain();

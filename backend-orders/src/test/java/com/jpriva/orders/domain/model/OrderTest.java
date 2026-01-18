@@ -74,27 +74,22 @@ class OrderTest {
 
     @Test
     void shouldThrowExceptionWhenAddingItemWithDifferentCurrency() {
+        // GIVEN an order in USD
         Order order = createValidOrder();
 
+        // AND a product with a price in EUR
+        Product productInEur = Product.create(UUID.randomUUID(), UUID.randomUUID(), "Product EUR", "SKU-EUR", "Desc");
         Money eurPrice = Money.fromString("EUR", "50");
+        productInEur.changePrice(eurPrice);
+        ProductPrice eurProductPrice = productInEur.getProductPrice(Currency.EUR);
 
-        Product product = Product.builder()
-                .id(UUID.randomUUID())
-                .companyId(UUID.randomUUID())
-                .name("Product EUR")
-                .sku("SKU-EUR")
-                .build();
+        // AND an order item based on that product
+        OrderItem itemInEur = OrderItem.create(order.getId(), productInEur, 1, eurProductPrice);
 
-        OrderItem item = OrderItem.builder()
-                .id(UUID.randomUUID())
-                .orderId(order.getId())
-                .productId(product.getId())
-                .productName(product.getName())
-                .quantity(1)
-                .unitPrice(eurPrice)
-                .build();
+        // WHEN adding the EUR item to the USD order
+        DomainException exception = assertThrows(DomainException.class, () -> order.addItem(itemInEur));
 
-        DomainException exception = assertThrows(DomainException.class, () -> order.addItem(item));
+        // THEN an exception for currency mismatch should be thrown
         assertEquals(OrderErrorCodes.ORDER_ITEM_CURRENCY_MISMATCH.getCode(), exception.getCode());
     }
 
