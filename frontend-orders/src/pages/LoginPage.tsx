@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
     Box,
     Button,
@@ -17,8 +16,6 @@ export const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-
-    const navigate = useNavigate();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -39,8 +36,7 @@ export const LoginPage = () => {
             localStorage.setItem('token', token);
             const userRole: string = decoded.roles || decoded.authorities || "EXTERNAL";
             localStorage.setItem('role', userRole);
-
-            navigate('/companies');
+            window.location.href = '/companies';
 
         } catch (err) {
             console.error(err);

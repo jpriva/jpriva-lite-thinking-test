@@ -18,7 +18,7 @@ export const Navbar = () => {
 
     const handleLogout = () => {
         localStorage.clear();
-        navigate('/login');
+        window.location.href = '/login';
     };
 
     return (

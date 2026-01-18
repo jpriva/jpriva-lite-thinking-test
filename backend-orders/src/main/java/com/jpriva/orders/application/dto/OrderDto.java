@@ -13,18 +13,9 @@ import java.util.stream.Collectors;
 
 public record OrderDto() {
 
-    public record CreateByUser(
+    public record CreateRequest(
             @NotNull(message = "Company ID is required")
-            UUID companyId,
-            @NotNull(message = "User ID is required")
-            UUID userId,
-            @NotNull(message = "Currency code is required")
-            String currencyCode
-    ) {
-    }
-    public record CreateByAdmin(
-            @NotNull(message = "Company ID is required")
-            UUID companyId,
+            String companyId,
             @NotNull(message = "Client ID is required")
             UUID clientId,
             @NotNull(message = "Currency code is required")

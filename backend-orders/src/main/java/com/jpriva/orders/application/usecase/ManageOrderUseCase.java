@@ -5,7 +5,6 @@ import com.jpriva.orders.domain.exceptions.*;
 import com.jpriva.orders.domain.model.*;
 import com.jpriva.orders.domain.model.vo.Currency;
 import com.jpriva.orders.domain.model.vo.OrderStatus;
-import com.jpriva.orders.domain.model.vo.Role;
 import com.jpriva.orders.domain.ports.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -40,10 +39,10 @@ public class ManageOrderUseCase {
     }
 
     @Transactional
-    public OrderDto.Response createOrder(OrderDto.CreateByAdmin request) {
+    public OrderDto.Response createOrder(OrderDto.CreateRequest request) {
         Currency currency = Currency.valueOf(request.currencyCode());
 
-        Company company = companyRepository.findById(request.companyId())
+        Company company = companyRepository.findByTaxId( request.companyId())
                 .orElseThrow(()->new DomainException(CompanyErrorCodes.COMPANY_NOT_FOUND));
 
         Client client = clientRepository.findById(request.clientId())

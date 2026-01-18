@@ -1,5 +1,5 @@
 import axiosClient from '../api/axiosClient';
-import type {Page, Order, CreateOrderRequest} from '../types';
+import type {Page, Order, CreateOrderRequest, AddOrderItemRequest} from '../types';
 
 export const OrderService = {
 
@@ -9,12 +9,17 @@ export const OrderService = {
     },
 
     getById: async (id: string) => {
-        const { data } = await axiosClient.get<Order>(`/api/orders/${id}`);
+        const { data } = await axiosClient.get<Order>(`/api/orders/order/${id}`);
         return data;
     },
 
     create: async (payload: CreateOrderRequest) => {
-        const { data } = await axiosClient.post<Order>('/api/orders/admin', payload);
+        const { data } = await axiosClient.post<Order>('/api/orders', payload);
+        return data;
+    },
+
+    addItem: async (orderId: string, item: AddOrderItemRequest) => {
+        const { data } = await axiosClient.post<Order>(`/api/orders/${orderId}/items`, item);
         return data;
     },
 };

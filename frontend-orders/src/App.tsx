@@ -6,6 +6,7 @@ import {MainLayout} from "./layouts/MainLayout.tsx";
 import {ProductsPage} from "./pages/ProductsPage.tsx";
 import {CategoriesPage} from "./pages/CategoriesPage.tsx";
 import {ClientsPage} from "./pages/ClientsPage.tsx";
+import {OrderManagePage} from "./pages/OrderManagePage.tsx";
 
 function App() {
     const isAuthenticated = !!localStorage.getItem('token');
@@ -19,6 +20,7 @@ function App() {
                     element={isAuthenticated ? <CompanyPage/> : <Navigate to="/login"/>}
                 />
                 <Route path="/orders/:companyId" element={isAuthenticated ? <OrdersPage/> : <Navigate to="/login"/>}/>
+                <Route path="/orders/:companyId/manage/:orderId" element={isAuthenticated ? <OrderManagePage /> : <Navigate to="/login"/>} />
                 <Route path="/products/:companyId" element={isAuthenticated ? <ProductsPage/> : <Navigate to="/login"/>}/>
                 <Route path="/categories/:companyId" element={isAuthenticated ? <CategoriesPage/> : <Navigate to="/login"/>}/>
                 <Route path="/clients/:companyId" element={isAuthenticated ? <ClientsPage/> : <Navigate to="/login"/>}/>

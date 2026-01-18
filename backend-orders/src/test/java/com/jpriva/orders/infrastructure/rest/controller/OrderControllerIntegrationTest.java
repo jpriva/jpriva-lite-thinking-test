@@ -134,7 +134,7 @@ class OrderControllerIntegrationTest {
     @Test
     void shouldCreateOrderByAdminSuccessfully() throws Exception {
         // Arrange
-        OrderDto.CreateByAdmin orderRequest = new OrderDto.CreateByAdmin(
+        OrderDto.CreateRequest orderRequest = new OrderDto.CreateRequest(
                 companyId,
                 clientId,
                 "USD"

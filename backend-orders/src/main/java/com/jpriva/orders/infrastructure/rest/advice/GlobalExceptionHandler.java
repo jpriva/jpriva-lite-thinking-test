@@ -6,8 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -28,7 +30,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DomainException.class)
     public ProblemDetail handleDomainException(DomainException ex) {
-        log.warn("Domain Exception: [{}] {}", ex.getCode(), ex.getMessage());
+        log.warn("Domain Exception: [{}] {}", ex.getCode(), ex.getMessage(), ex);
         
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.valueOf(ex.getHttpStatus()),
@@ -40,8 +42,32 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ProblemDetail handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        log.warn("Invalid request body format: {}", ex.getMessage(), ex);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Invalid request body format"
+        );
+        problemDetail.setTitle("Invalid Request Body");
+        return problemDetail;
+    }
+
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ProblemDetail handlePropertyReferenceException(PropertyReferenceException ex) {
+        log.warn("Invalid property reference: {}", ex.getMessage(), ex);
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Invalid property reference"
+                );
+        problemDetail.setTitle("Invalid Property Reference");
+        return problemDetail;
+    }
+
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidationErrors(MethodArgumentNotValidException ex) {
+        log.warn("Validation failed for the request: {}", ex.getMessage(), ex);
         ProblemDetail details = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Validation failed for the request.");
         details.setTitle("Validation Error");
         Map<String, String> errors = new HashMap<>();
@@ -54,6 +80,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidDataAccessApiUsageException.class)
     public ProblemDetail handleInvalidDataAccessApiUsage(InvalidDataAccessApiUsageException ex) {
+        log.warn("Invalid data access API usage: {}", ex.getMessage(), ex);
         ProblemDetail details = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
         details.setTitle("Validation Error");
         return details;
@@ -61,6 +88,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
     public ProblemDetail handleConstraintViolation(SQLIntegrityConstraintViolationException ex) {
+        log.warn("Constraint violation: {}", ex.getMessage(), ex);
         ProblemDetail details = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
         details.setTitle("Constraint Violation");
         return details;
@@ -69,6 +97,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ProblemDetail handleConstraintViolation(ConstraintViolationException ex) {
+        log.warn("Constraint violation: {}", ex.getMessage(), ex);
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
                 "Invalid requested params"
@@ -89,6 +118,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ProblemDetail handleMissingServletRequestParameter(MissingServletRequestParameterException ex) {
+        log.warn("Missing required parameter: {}", ex.getMessage(), ex);
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
                 "Missing required parameter: " + ex.getParameterName()
@@ -99,6 +129,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NoResourceFoundException.class)
     public ProblemDetail handleMissingServletRequestParameter(NoResourceFoundException ex) {
+        log.warn("Path not found: {}", ex.getMessage(), ex);
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
                 "Path not found: " + ex.getResourcePath()
@@ -109,6 +140,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleGeneralException(Exception ex) {
+        log.error("Unexpected error: {}", ex.getMessage(), ex);
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error");
         problem.setTitle("Internal Error");
         return problem;
@@ -116,6 +148,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        log.warn("Data integrity violation: {}", ex.getMessage(), ex);
+
 
         HttpStatus status = HttpStatus.CONFLICT;
         String detail = "Data integrity error. The operation cannot be completed.";
@@ -131,6 +165,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ProblemDetail handleAuthorizationDeniedException(AuthorizationDeniedException ex) {
+        log.warn("Authorization denied: {}", ex.getMessage(), ex);
 
         HttpStatus status = HttpStatus.FORBIDDEN;
         String detail = "Access Denied. You do not have permission to access this resource";

@@ -47,7 +47,7 @@ class ManageOrderUseCaseTest {
     private Product testProduct;
     private Order testOrder;
     private OrderDto.CreateByUser createByUserRequest;
-    private OrderDto.CreateByAdmin createByAdminRequest;
+    private OrderDto.CreateRequest createByAdminRequest;
     private OrderDto.AddItemRequest addItemRequest;
 
     @BeforeEach
@@ -76,7 +76,7 @@ class ManageOrderUseCaseTest {
         testOrder = Order.builder().id(orderId).companyId(companyId).clientId(clientId).clientName(testClient.getName()).address(testClient.getAddress()).orderDate(LocalDateTime.now()).status(OrderStatus.PENDING).totalAmount(Money.zero(Currency.USD)).build();
 
         createByUserRequest = new OrderDto.CreateByUser(companyId, userId, "USD");
-        createByAdminRequest = new OrderDto.CreateByAdmin(companyId, clientId, "USD");
+        createByAdminRequest = new OrderDto.CreateRequest(companyId, clientId, "USD");
         addItemRequest = new OrderDto.AddItemRequest(productId, 5);
     }
 
