@@ -1,16 +1,6 @@
-import React, { useState } from 'react';
-import {
-    Box,
-    Button,
-    Card,
-    CardContent,
-    TextField,
-    Typography,
-    Alert
-} from '@mui/material';
-import axiosClient from '../api/axiosClient';
-import type {TokenResponse} from "../types";
-import {jwtDecode} from "jwt-decode";
+import React, {useState} from 'react';
+import {Alert, Box, Button, Card, CardContent, TextField, Typography} from '@mui/material';
+import {AuthService} from "../services";
 
 export const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -20,24 +10,8 @@ export const LoginPage = () => {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-
         try {
-            const response = await axiosClient.post('/auth/login', {
-                email,
-                password
-            });
-
-            const tokenResponse: TokenResponse = response.data;
-            const token: string = tokenResponse.accessToken;
-            console.log(tokenResponse);
-            console.log(token);
-            const decoded: any = jwtDecode(token);
-            console.log(decoded)
-            localStorage.setItem('token', token);
-            const userRole: string = decoded.roles || decoded.authorities || "EXTERNAL";
-            localStorage.setItem('role', userRole);
-            window.location.href = '/companies';
-
+            await AuthService.login({email, password});
         } catch (err) {
             console.error(err);
             setError('Error');

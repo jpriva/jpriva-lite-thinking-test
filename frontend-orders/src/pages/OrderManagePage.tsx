@@ -1,19 +1,32 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import {useEffect, useState} from 'react';
+import {useNavigate, useParams} from 'react-router-dom';
 import {
-    Box, Paper, Typography, TextField, Button, Grid, MenuItem,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    Card, CardContent, Divider, Chip
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Chip,
+    Divider,
+    Grid,
+    MenuItem,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
+    Typography
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 
-import { OrderService } from '../services/order.service';
-import { ProductService } from '../services/product.service';
-import type { Order, Product } from '../types';
+import {OrderService, ProductService} from '../services';
+import type {Order, Product} from '../types';
 
 export const OrderManagePage = () => {
-    const { companyId, orderId } = useParams();
+    const {companyId, orderId} = useParams();
     const navigate = useNavigate();
 
     const [order, setOrder] = useState<Order | null>(null);
@@ -56,7 +69,7 @@ export const OrderManagePage = () => {
 
             setOrder(updatedOrder);
 
-            setItemForm({ productId: '', quantity: 1 });
+            setItemForm({productId: '', quantity: 1});
         } catch (error) {
             console.error("Error adding item", error);
             alert("Error adding item");
@@ -75,35 +88,38 @@ export const OrderManagePage = () => {
     if (!order) return <Typography>Loading order...</Typography>;
 
     return (
-        <Box component="main" sx={{ p: 3, maxWidth: 1000, margin: '0 auto' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(`/orders/${companyId}`)} sx={{ mr: 2 }}>
+        <Box component="main" sx={{p: 3, maxWidth: 1000, margin: '0 auto'}}>
+            <Box sx={{display: 'flex', alignItems: 'center', mb: 3}}>
+                <Button startIcon={<ArrowBackIcon/>} onClick={() => navigate(`/orders/${companyId}`)} sx={{mr: 2}}>
                     Terminate / Go back
                 </Button>
                 <Typography variant="h4">Manage Order</Typography>
-                <Chip label={order.status} color="primary" variant="outlined" sx={{ ml: 2 }} />
+                <Chip label={order.status} color="primary" variant="outlined" sx={{ml: 2}}/>
             </Box>
 
-            <Card variant="outlined" sx={{ mb: 3, bgcolor: '#f8f9fa' }}>
+            <Card variant="outlined" sx={{mb: 3, bgcolor: '#f8f9fa'}}>
                 <CardContent>
                     <Grid container spacing={2}>
-                        <Grid size={{ xs: 4 }}><Typography><b>Client:</b> {order.clientName}</Typography></Grid>
-                        <Grid size={{ xs: 4 }}><Typography><b>Currency:</b> {order.currency}</Typography></Grid>
-                        <Grid size={{ xs: 4 }}>
+                        <Grid size={{xs: 4}}><Typography><b>Client:</b> {order.clientName}</Typography></Grid>
+                        <Grid size={{xs: 4}}><Typography><b>Currency:</b> {order.currency}</Typography></Grid>
+                        <Grid size={{xs: 4}}>
                             <Typography variant="h5" align="right" color="primary">
-                                Total: {new Intl.NumberFormat('es-CO', { style: 'currency', currency: order.currency }).format(order.totalAmount)}
+                                Total: {new Intl.NumberFormat('es-CO', {
+                                style: 'currency',
+                                currency: order.currency
+                            }).format(order.totalAmount)}
                             </Typography>
                         </Grid>
                     </Grid>
                 </CardContent>
             </Card>
 
-            <Divider sx={{ mb: 3 }}>Add Products</Divider>
+            <Divider sx={{mb: 3}}>Add Products</Divider>
 
-            <Paper sx={{ p: 3, mb: 3 }}>
+            <Paper sx={{p: 3, mb: 3}}>
                 <Grid container spacing={2} alignItems="center">
 
-                    <Grid size={{ xs: 12, md: 6 }}>
+                    <Grid size={{xs: 12, md: 6}}>
                         <TextField
                             select
                             label="Select product"
@@ -124,7 +140,7 @@ export const OrderManagePage = () => {
                         )}
                     </Grid>
 
-                    <Grid size={{ xs: 6, md: 3 }}>
+                    <Grid size={{xs: 6, md: 3}}>
                         <TextField
                             label="Cantidad"
                             type="number"
@@ -132,17 +148,17 @@ export const OrderManagePage = () => {
                             value={itemForm.quantity}
                             onChange={(e) => setItemForm({...itemForm, quantity: Number(e.target.value)})}
                             slotProps={{
-                                htmlInput: { min: 1 }
+                                htmlInput: {min: 1}
                             }}
                         />
                     </Grid>
 
-                    <Grid size={{ xs: 6, md: 3 }}>
+                    <Grid size={{xs: 6, md: 3}}>
                         <Button
                             variant="contained"
                             fullWidth
                             size="large"
-                            startIcon={<AddShoppingCartIcon />}
+                            startIcon={<AddShoppingCartIcon/>}
                             onClick={handleAddItem}
                             disabled={loading || !itemForm.productId}
                         >
@@ -154,7 +170,7 @@ export const OrderManagePage = () => {
 
             <TableContainer component={Paper} variant="outlined">
                 <Table>
-                    <TableHead sx={{ bgcolor: '#eee' }}>
+                    <TableHead sx={{bgcolor: '#eee'}}>
                         <TableRow>
                             <TableCell>Product</TableCell>
                             <TableCell align="right">Unit Price</TableCell>
@@ -168,17 +184,23 @@ export const OrderManagePage = () => {
                             <TableRow key={item.id}>
                                 <TableCell>{item.productName}</TableCell>
                                 <TableCell align="right">
-                                    {new Intl.NumberFormat('es-CO', { style: 'currency', currency: order.currency }).format(item.unitPrice)}
+                                    {new Intl.NumberFormat('es-CO', {
+                                        style: 'currency',
+                                        currency: order.currency
+                                    }).format(item.unitPrice)}
                                 </TableCell>
                                 <TableCell align="center">{item.quantity}</TableCell>
                                 <TableCell align="right">
-                                    {new Intl.NumberFormat('es-CO', { style: 'currency', currency: order.currency }).format(item.unitPrice * item.quantity)}
+                                    {new Intl.NumberFormat('es-CO', {
+                                        style: 'currency',
+                                        currency: order.currency
+                                    }).format(item.unitPrice * item.quantity)}
                                 </TableCell>
                             </TableRow>
                         ))}
                         {order.items.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                                <TableCell colSpan={5} align="center" sx={{py: 3}}>
                                     Order is empty. Add products above.
                                 </TableCell>
                             </TableRow>

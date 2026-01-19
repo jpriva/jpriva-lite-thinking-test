@@ -1,32 +1,30 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import {useEffect, useState} from 'react';
+import {useNavigate, useParams} from 'react-router-dom';
 import {
     Box,
-    Paper,
-    Typography,
     Button,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    TextField,
-    MenuItem,
     Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     IconButton,
-    Tooltip
+    MenuItem,
+    Paper,
+    TextField,
+    Tooltip,
+    Typography
 } from '@mui/material';
-import { DataGrid, type GridColDef, type GridRenderCellParams } from '@mui/x-data-grid';
+import {DataGrid, type GridColDef, type GridRenderCellParams} from '@mui/x-data-grid';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 
-import { OrderService } from '../services/order.service';
-import { ClientService } from '../services/client.service';
-import { CURRENCIES } from '../types/currencies';
-import type { Order, Client } from '../types';
+import {AuthService, ClientService, OrderService} from '../services';
+import {type Client, CURRENCIES, type Order} from '../types';
 
 export const OrdersPage = () => {
-    const { companyId } = useParams();
+    const {companyId} = useParams();
     const navigate = useNavigate();
 
     const [rows, setRows] = useState<Order[]>([]);
@@ -44,8 +42,7 @@ export const OrdersPage = () => {
         currencyCode: 'COP'
     });
 
-    const roles:string | null = localStorage.getItem('role');
-    const isAdmin = roles?.includes('ADMIN');
+    const isAdmin: boolean = AuthService.isAuthenticated() && AuthService.isAdmin();
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -75,7 +72,9 @@ export const OrdersPage = () => {
             try {
                 const data = await ClientService.getAll(companyId);
                 setClients(data || []);
-            } catch (e) { console.error(e); }
+            } catch (e) {
+                console.error(e);
+            }
         };
         void fetchClients();
     }, [companyId]);
@@ -107,8 +106,8 @@ export const OrdersPage = () => {
             width: 100,
             renderCell: (params) => params.value.substring(0, 8)
         },
-        { field: 'clientName', headerName: 'Client', flex: 1, minWidth: 150 },
-        { field: 'orderDate', headerName: 'Date', width: 150 },
+        {field: 'clientName', headerName: 'Client', flex: 1, minWidth: 150},
+        {field: 'orderDate', headerName: 'Date', width: 150},
         {
             field: 'totalAmount',
             headerName: 'Total',
@@ -132,10 +131,10 @@ export const OrdersPage = () => {
             renderCell: (params) => {
                 const status = params.value as string;
                 let color: 'default' | 'primary' | 'success' | 'warning' = 'default';
-                if(status === 'PENDING') color = 'warning';
-                if(status === 'COMPLETED') color = 'success';
+                if (status === 'PENDING') color = 'warning';
+                if (status === 'COMPLETED') color = 'success';
 
-                return <Chip label={status} color={color} size="small" variant="outlined" />;
+                return <Chip label={status} color={color} size="small" variant="outlined"/>;
             }
         },
         {
@@ -149,7 +148,7 @@ export const OrdersPage = () => {
                         color="primary"
                         onClick={() => navigate(`/orders/${companyId}/manage/${params.row.id}`)}
                     >
-                        <VisibilityIcon />
+                        <VisibilityIcon/>
                     </IconButton>
                 </Tooltip>
             )
@@ -157,29 +156,29 @@ export const OrdersPage = () => {
     ];
 
     return (
-        <Box component="main" sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, justifyContent: 'space-between' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box component="main" sx={{p: 3}}>
+            <Box sx={{display: 'flex', alignItems: 'center', mb: 3, justifyContent: 'space-between'}}>
+                <Box sx={{display: 'flex', alignItems: 'center'}}>
                     <Button
-                        startIcon={<ArrowBackIcon />}
+                        startIcon={<ArrowBackIcon/>}
                         onClick={() => navigate('/companies')}
-                        sx={{ mr: 2 }}
+                        sx={{mr: 2}}
                     >
                         Back
                     </Button>
                     <Typography variant="h4">Orders</Typography>
                 </Box>
-                { isAdmin &&
-                <Button
-                    variant="contained"
-                    startIcon={<AddCircleIcon />}
-                    onClick={() => setOpenCreateModal(true)}
-                >
-                    New Order
-                </Button>}
+                {isAdmin &&
+                    <Button
+                        variant="contained"
+                        startIcon={<AddCircleIcon/>}
+                        onClick={() => setOpenCreateModal(true)}
+                    >
+                        New Order
+                    </Button>}
             </Box>
 
-            <Paper sx={{ height: 500, width: '100%' }}>
+            <Paper sx={{height: 500, width: '100%'}}>
                 <DataGrid
                     rows={rows}
                     columns={columns}
@@ -196,7 +195,7 @@ export const OrdersPage = () => {
             <Dialog open={openCreateModal} onClose={() => setOpenCreateModal(false)} maxWidth="sm" fullWidth>
                 <DialogTitle>Create New Order</DialogTitle>
                 <DialogContent>
-                    <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                    <Box sx={{mt: 2, display: 'flex', flexDirection: 'column', gap: 3}}>
 
                         <TextField
                             select

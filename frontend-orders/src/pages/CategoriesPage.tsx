@@ -1,29 +1,28 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import {useCallback, useEffect, useState} from 'react';
+import {useNavigate, useParams} from 'react-router-dom';
 import {
     Box,
-    Paper,
-    Typography,
     Button,
     Dialog,
-    DialogTitle,
-    DialogContent,
     DialogActions,
+    DialogContent,
+    DialogTitle,
+    Paper,
     TextField,
+    Typography,
 } from '@mui/material';
-import { DataGrid, type GridColDef } from '@mui/x-data-grid';
+import {DataGrid, type GridColDef} from '@mui/x-data-grid';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-import { CategoryService } from '../services/category.service';
-import type { Category, CreateCategoryRequest } from '../types';
+import {AuthService, CategoryService} from '../services';
+import type {Category, CreateCategoryRequest} from '../types';
 
 export const CategoriesPage = () => {
-    const { companyId } = useParams();
+    const {companyId} = useParams();
     const navigate = useNavigate();
 
-    const roles:string | null = localStorage.getItem('role');
-    const isAdmin = roles?.includes('ADMIN');
+    const isAdmin: boolean = AuthService.isAuthenticated() && AuthService.isAdmin();
 
     const [rows, setRows] = useState<Category[]>([]);
     const [loading, setLoading] = useState(false);
@@ -34,7 +33,7 @@ export const CategoriesPage = () => {
         description: ''
     });
 
-    const fetchCategories = async () => {
+    const fetchCategories = useCallback(async () => {
         if (!companyId) return;
         try {
             setLoading(true);
@@ -45,11 +44,11 @@ export const CategoriesPage = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [companyId]);
 
     useEffect(() => {
         void fetchCategories();
-    }, [companyId]);
+    }, [fetchCategories]);
 
 
     const handleCreate = async () => {
@@ -68,7 +67,7 @@ export const CategoriesPage = () => {
             await CategoryService.create(payload);
 
             setOpenModal(false);
-            setFormData({ name: '', description: '' });
+            setFormData({name: '', description: ''});
             void fetchCategories();
         } catch (error) {
             console.error("Error creating category", error);
@@ -77,18 +76,18 @@ export const CategoriesPage = () => {
     };
 
     const columns: GridColDef[] = [
-        { field: 'name', headerName: 'Name', width: 250, editable: true },
-        { field: 'description', headerName: 'Description', width: 400 },
+        {field: 'name', headerName: 'Name', width: 250, editable: true},
+        {field: 'description', headerName: 'Description', width: 400},
     ];
 
     return (
-        <Box component="main" sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, justifyContent: 'space-between' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box component="main" sx={{p: 3}}>
+            <Box sx={{display: 'flex', alignItems: 'center', mb: 3, justifyContent: 'space-between'}}>
+                <Box sx={{display: 'flex', alignItems: 'center'}}>
                     <Button
-                        startIcon={<ArrowBackIcon />}
+                        startIcon={<ArrowBackIcon/>}
                         onClick={() => navigate('/companies')}
-                        sx={{ mr: 2 }}
+                        sx={{mr: 2}}
                     >
                         Back
                     </Button>
@@ -96,21 +95,21 @@ export const CategoriesPage = () => {
                 </Box>
 
                 {isAdmin &&
-                <Button
-                    variant="contained"
-                    startIcon={<AddCircleIcon />}
-                    onClick={() => setOpenModal(true)}
-                >
-                    New Category
-                </Button>}
+                    <Button
+                        variant="contained"
+                        startIcon={<AddCircleIcon/>}
+                        onClick={() => setOpenModal(true)}
+                    >
+                        New Category
+                    </Button>}
             </Box>
 
-            <Paper sx={{ height: 500, width: '100%' }}>
+            <Paper sx={{height: 500, width: '100%'}}>
                 <DataGrid
                     rows={rows}
                     columns={columns}
                     loading={loading}
-                    initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+                    initialState={{pagination: {paginationModel: {pageSize: 10}}}}
                     pageSizeOptions={[10, 20]}
                     disableRowSelectionOnClick
                 />
@@ -119,14 +118,14 @@ export const CategoriesPage = () => {
             <Dialog open={openModal} onClose={() => setOpenModal(false)} maxWidth="sm" fullWidth>
                 <DialogTitle>Add New Category</DialogTitle>
                 <DialogContent>
-                    <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box sx={{mt: 1, display: 'flex', flexDirection: 'column', gap: 2}}>
                         <TextField
                             autoFocus
                             label="Category Name"
                             fullWidth
                             required
                             value={formData.name}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                            onChange={(e) => setFormData({...formData, name: e.target.value})}
                         />
                         <TextField
                             label="Description"
@@ -134,7 +133,7 @@ export const CategoriesPage = () => {
                             multiline
                             rows={3}
                             value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            onChange={(e) => setFormData({...formData, description: e.target.value})}
                         />
                     </Box>
                 </DialogContent>

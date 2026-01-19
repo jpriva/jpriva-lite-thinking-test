@@ -1,32 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {DataGrid, type GridColDef, type GridRowParams} from '@mui/x-data-grid';
-import type { Company } from '../types';
-import { CompanyService } from '../services/company.service';
-import {
-    Box,
-    Button,
-    Typography,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    TextField
-} from '@mui/material';
+import type {Company} from '../types';
+import {AuthService, CompanyService} from '../services';
+import {Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography} from '@mui/material';
 import {useNavigate} from "react-router-dom";
 
 const columns: GridColDef[] = [
-    { field: 'taxId', headerName: 'NIT/ID', width: 150 },
-    { field: 'name', headerName: 'Name', width: 200 },
-    { field: 'address', headerName: 'Address', width: 250 },
-    { field: 'phone', headerName: 'Phone', width: 150 },
+    {field: 'taxId', headerName: 'NIT/ID', width: 150},
+    {field: 'name', headerName: 'Name', width: 200},
+    {field: 'address', headerName: 'Address', width: 250},
+    {field: 'phone', headerName: 'Phone', width: 150},
 ];
 
 export const CompanyPage = () => {
     const navigate = useNavigate();
     const [rows, setRows] = useState<Company[]>([]);
     const [loading, setLoading] = useState(true);
-    const roles:string | null = localStorage.getItem('role');
-    const isAdmin = roles?.includes('ADMIN');
+
+    const isAdmin: boolean = AuthService.isAuthenticated() && AuthService.isAdmin();
 
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState({
@@ -40,7 +31,7 @@ export const CompanyPage = () => {
         try {
             setLoading(true);
             const data = await CompanyService.getAll();
-            const rowsWithId = data.map(row => ({ ...row, id: row.taxId }));
+            const rowsWithId = data.map(row => ({...row, id: row.taxId}));
             setRows(rowsWithId);
         } catch (error) {
             console.error("Error loading companies", error);
@@ -57,7 +48,7 @@ export const CompanyPage = () => {
 
     const handleClose = () => {
         setOpen(false);
-        setFormData({ taxId: '', name: '', address: '', phone: '' });
+        setFormData({taxId: '', name: '', address: '', phone: ''});
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,13 +75,13 @@ export const CompanyPage = () => {
     };
 
     return (
-        <Box component="main" sx={{ height: 400, width: '100%', p: 2 }}>
+        <Box component="main" sx={{height: 400, width: '100%', p: 2}}>
             <Typography variant="h4" gutterBottom>Companies</Typography>
 
             {isAdmin &&
-            <Button variant="contained" onClick={handleOpen} sx={{ mb: 2 }}>
-                New Company
-            </Button>}
+                <Button variant="contained" onClick={handleOpen} sx={{mb: 2}}>
+                    New Company
+                </Button>}
 
             <DataGrid
                 rows={rows}
@@ -104,7 +95,7 @@ export const CompanyPage = () => {
                     }
                 }}
                 initialState={{
-                    pagination: { paginationModel: { pageSize: 100 } },
+                    pagination: {paginationModel: {pageSize: 100}},
                 }}
                 pageSizeOptions={[5, 10]}
                 disableRowSelectionOnClick

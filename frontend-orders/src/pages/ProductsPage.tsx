@@ -1,35 +1,36 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import {useCallback, useEffect, useState} from 'react';
+import {useNavigate, useParams} from 'react-router-dom';
 import {
     Box,
-    Paper,
-    Typography,
     Button,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    TextField,
     Chip,
-    Stack,
-    MenuItem,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     IconButton,
-    Tooltip
+    MenuItem,
+    Paper,
+    Stack,
+    TextField,
+    Tooltip,
+    Typography
 } from '@mui/material';
-import { DataGrid, type GridColDef, type GridRenderCellParams } from '@mui/x-data-grid';
+import {DataGrid, type GridColDef, type GridRenderCellParams} from '@mui/x-data-grid';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-import { ProductService } from '../services/product.service';
-import type { Product, CreateProductRequest, Category } from '../types';
-import { CategoryService } from '../services/category.service';
+import {AuthService, CategoryService, ProductService} from '../services';
+import type {Category, CreateProductRequest, Product} from '../types';
+import {CURRENCIES} from '../types';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
-import { CURRENCIES } from '../types/currencies';
 
 export const ProductsPage = () => {
-    const { companyId } = useParams();
+    const {companyId} = useParams();
     const navigate = useNavigate();
+
+    const isAdmin: boolean = AuthService.isAuthenticated() && AuthService.isAdmin();
 
     const [rows, setRows] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
@@ -42,8 +43,6 @@ export const ProductsPage = () => {
         sku: '',
         description: ''
     });
-    const roles:string | null = localStorage.getItem('role');
-    const isAdmin = roles?.includes('ADMIN');
     const [categories, setCategories] = useState<Category[]>([]);
     const [openStockModal, setOpenStockModal] = useState(false);
     const [stockAmount, setStockAmount] = useState<number | string>('');
@@ -55,7 +54,7 @@ export const ProductsPage = () => {
         currencyCode: 'COP'
     });
 
-    const fetchProducts = async () => {
+    const fetchProducts = useCallback(async () => {
         if (!companyId) return;
         try {
             setLoading(true);
@@ -66,9 +65,9 @@ export const ProductsPage = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [companyId]);
 
-    const fetchCategories = async () => {
+    const fetchCategories = useCallback(async () => {
         if (!companyId) return;
         try {
             const data = await CategoryService.getAll(companyId);
@@ -76,12 +75,12 @@ export const ProductsPage = () => {
         } catch (error) {
             console.error("Error loading categories", error);
         }
-    };
+    }, [companyId]);
 
     useEffect(() => {
         void fetchProducts();
         void fetchCategories();
-    }, [companyId]);
+    }, [fetchProducts, fetchCategories]);
 
     const handleCreate = async () => {
         if (!newProduct.name || !newProduct.sku || !newProduct.categoryId) {
@@ -91,7 +90,7 @@ export const ProductsPage = () => {
         try {
             await ProductService.create(newProduct);
             setOpenCreate(false);
-            setNewProduct({ ...newProduct, name: '', sku: '', description: '' });
+            setNewProduct({...newProduct, name: '', sku: '', description: ''});
             void fetchProducts();
         } catch (error) {
             console.error("Error creating product", error);
@@ -124,7 +123,7 @@ export const ProductsPage = () => {
 
     const handleOpenPrice = (id: string) => {
         setSelectedProductId(id);
-        setPriceData({ price: '', currencyCode: 'COP' });
+        setPriceData({price: '', currencyCode: 'COP'});
         setOpenPriceModal(true);
     };
 
@@ -149,14 +148,14 @@ export const ProductsPage = () => {
     };
 
     const columns: GridColDef[] = [
-        { field: 'sku', headerName: 'SKU', width: 120, minWidth: 100 },
-        { field: 'name', headerName: 'Product Name', flex: 1.5, minWidth: 150 },
+        {field: 'sku', headerName: 'SKU', width: 120, minWidth: 100},
+        {field: 'name', headerName: 'Product Name', flex: 1.5, minWidth: 150},
         {
             field: 'stockQuantity',
             headerName: 'Stock',
             width: 130,
             renderCell: (params) => (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
                     <Typography
                         fontWeight="bold"
                         color={params.value < 10 ? 'error.main' : 'success.main'}
@@ -165,18 +164,18 @@ export const ProductsPage = () => {
                     </Typography>
 
                     {isAdmin &&
-                    <Tooltip title="Add Stock">
-                        <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleOpenStock(params.row.id);
-                            }}
-                        >
-                            <AddIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>}
+                        <Tooltip title="Add Stock">
+                            <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenStock(params.row.id);
+                                }}
+                            >
+                                <AddIcon fontSize="small"/>
+                            </IconButton>
+                        </Tooltip>}
                 </Box>
             )
         },
@@ -203,8 +202,8 @@ export const ProductsPage = () => {
                                 overflowX: 'auto',
                                 width: '100%',
                                 pb: '4px',
-                                '&::-webkit-scrollbar': { height: '6px' },
-                                '&::-webkit-scrollbar-thumb': { backgroundColor: '#e0e0e0', borderRadius: '10px' }
+                                '&::-webkit-scrollbar': {height: '6px'},
+                                '&::-webkit-scrollbar-thumb': {backgroundColor: '#e0e0e0', borderRadius: '10px'}
                             }}
                         >
                             {pricesMap && Object.entries(pricesMap).map(([code, amount]) => {
@@ -222,57 +221,57 @@ export const ProductsPage = () => {
                                             label={`${symbol} ${amount.toLocaleString()}`}
                                             size="small"
                                             variant="outlined"
-                                            sx={{ backgroundColor: '#fff', cursor: 'help' }}
+                                            sx={{backgroundColor: '#fff', cursor: 'help'}}
                                         />
                                     </Tooltip>
                                 );
                             })}
                         </Stack>
                         {isAdmin &&
-                        <Tooltip title="Update Price">
-                            <IconButton
-                                size="small"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleOpenPrice(params.row.id);
-                                }}
-                            >
-                                <EditIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>}
+                            <Tooltip title="Update Price">
+                                <IconButton
+                                    size="small"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleOpenPrice(params.row.id);
+                                    }}
+                                >
+                                    <EditIcon fontSize="small"/>
+                                </IconButton>
+                            </Tooltip>}
                     </Box>
                 );
             }
         },
-        { field: 'description', headerName: 'Description',flex: 1, minWidth: 150 },
+        {field: 'description', headerName: 'Description', flex: 1, minWidth: 150},
     ];
 
     return (
-        <Box component="main" sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, justifyContent: 'space-between' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/companies')} sx={{ mr: 2 }}>
+        <Box component="main" sx={{p: 3}}>
+            <Box sx={{display: 'flex', alignItems: 'center', mb: 3, justifyContent: 'space-between'}}>
+                <Box sx={{display: 'flex', alignItems: 'center'}}>
+                    <Button startIcon={<ArrowBackIcon/>} onClick={() => navigate('/companies')} sx={{mr: 2}}>
                         Back
                     </Button>
                     <Typography variant="h4">Products Inventory</Typography>
                 </Box>
-
-                <Button
-                    variant="contained"
-                    startIcon={<AddCircleIcon />}
-                    onClick={() => setOpenCreate(true)}
-                >
-                    New Product
-                </Button>
+                {isAdmin &&
+                    <Button
+                        variant="contained"
+                        startIcon={<AddCircleIcon/>}
+                        onClick={() => setOpenCreate(true)}
+                    >
+                        New Product
+                    </Button>}
             </Box>
 
-            <Paper sx={{ height: 500, width: '100%' }}>
+            <Paper sx={{height: 500, width: '100%'}}>
                 <DataGrid
                     rows={rows}
                     columns={columns}
                     loading={loading}
                     getRowId={(row) => row.id}
-                    initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+                    initialState={{pagination: {paginationModel: {pageSize: 10}}}}
                     pageSizeOptions={[10, 20]}
                     disableRowSelectionOnClick
                 />
@@ -281,7 +280,7 @@ export const ProductsPage = () => {
             <Dialog open={openCreate} onClose={() => setOpenCreate(false)}>
                 <DialogTitle>Register New Product</DialogTitle>
                 <DialogContent>
-                    <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 2, minWidth: 400 }}>
+                    <Box sx={{mt: 1, display: 'flex', flexDirection: 'column', gap: 2, minWidth: 400}}>
                         <TextField
                             label="Name"
                             fullWidth
@@ -332,7 +331,7 @@ export const ProductsPage = () => {
             <Dialog open={openStockModal} onClose={() => setOpenStockModal(false)} maxWidth="xs" fullWidth>
                 <DialogTitle>Add Stock</DialogTitle>
                 <DialogContent>
-                    <Typography variant="body2" sx={{ mb: 2 }}>
+                    <Typography variant="body2" sx={{mb: 2}}>
                         Enter the quantity to add to the existing inventory.
                     </Typography>
                     <TextField
@@ -343,13 +342,13 @@ export const ProductsPage = () => {
                         value={stockAmount}
                         onChange={(e) => setStockAmount(e.target.value)}
                         slotProps={{
-                            htmlInput: { min: 1 }
+                            htmlInput: {min: 1}
                         }}
                     />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenStockModal(false)} color="secondary">Cancel</Button>
-                    <Button onClick={handleSaveStock} variant="contained" startIcon={<AddIcon />}>
+                    <Button onClick={handleSaveStock} variant="contained" startIcon={<AddIcon/>}>
                         Add
                     </Button>
                 </DialogActions>
@@ -357,14 +356,14 @@ export const ProductsPage = () => {
             <Dialog open={openPriceModal} onClose={() => setOpenPriceModal(false)} maxWidth="xs" fullWidth>
                 <DialogTitle>Update Price</DialogTitle>
                 <DialogContent>
-                    <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Box sx={{mt: 1, display: 'flex', flexDirection: 'column', gap: 2}}>
 
                         <TextField
                             select
                             label="Currency"
                             fullWidth
                             value={priceData.currencyCode}
-                            onChange={(e) => setPriceData({ ...priceData, currencyCode: e.target.value })}
+                            onChange={(e) => setPriceData({...priceData, currencyCode: e.target.value})}
                         >
                             {CURRENCIES.map((option) => (
                                 <MenuItem key={option.code} value={option.code}>
@@ -380,16 +379,16 @@ export const ProductsPage = () => {
                             type="number"
                             fullWidth
                             value={priceData.price}
-                            onChange={(e) => setPriceData({ ...priceData, price: e.target.value })}
+                            onChange={(e) => setPriceData({...priceData, price: e.target.value})}
                             slotProps={{
-                                htmlInput: { min: 0 }
+                                htmlInput: {min: 0}
                             }}
                         />
                     </Box>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenPriceModal(false)} color="secondary">Cancel</Button>
-                    <Button onClick={handleSavePrice} variant="contained" startIcon={<EditIcon />}>
+                    <Button onClick={handleSavePrice} variant="contained" startIcon={<EditIcon/>}>
                         Update
                     </Button>
                 </DialogActions>
