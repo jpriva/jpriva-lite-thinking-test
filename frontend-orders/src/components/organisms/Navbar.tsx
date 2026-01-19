@@ -4,7 +4,7 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import CategoryIcon from '@mui/icons-material/Category';
 import GroupsIcon from '@mui/icons-material/Groups';
-import {AuthService} from "../services";
+import {AuthService} from "../../services";
 
 export const Navbar = () => {
     const navigate = useNavigate();
