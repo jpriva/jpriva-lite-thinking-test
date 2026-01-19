@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Alert } from '@mui/material';
-import { UserRegistrationForm } from '../components/organisms/UserRegistrationForm';
+import { UserRegistrationForm } from '../components/organisms';
 import { AuthService } from '../services';
 
 export const AdminRegistrationPage = () => {

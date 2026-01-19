@@ -22,6 +22,8 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import {CurrencySelector} from "../components/molecules";
 import {ProductsTable} from "../components/organisms";
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import {PdfActionDialog} from "../components/organisms";
 
 export const ProductsPage = () => {
     const {companyId} = useParams();
@@ -36,6 +38,7 @@ export const ProductsPage = () => {
     const [loading, setLoading] = useState(false);
 
     const [openCreate, setOpenCreate] = useState(false);
+    const [openPdf, setOpenPdf] = useState(false);
     const [newProduct, setNewProduct] = useState<CreateProductRequest>({
         companyId: companyId || '',
         categoryId: '',
@@ -164,6 +167,14 @@ export const ProductsPage = () => {
                     margin="normal"
                     sx={{width: '300px'}}
                 />
+
+                <Button
+                    variant="contained"
+                    startIcon={<PictureAsPdfIcon/>}
+                    onClick={() => setOpenPdf(true)}
+                >
+                    Get Pdf
+                </Button>
                 {isAdmin &&
                     <Button
                         variant="contained"
@@ -300,7 +311,13 @@ export const ProductsPage = () => {
                         Update
                     </Button>
                 </DialogActions>
+
             </Dialog>
+            <PdfActionDialog
+                open={openPdf}
+                onClose={() => setOpenPdf(false)}
+                companyId={companyId}
+            />
         </Box>
     );
 };

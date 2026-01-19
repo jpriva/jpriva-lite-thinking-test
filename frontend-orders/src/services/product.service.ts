@@ -23,4 +23,17 @@ export const ProductService = {
         });
         return data;
     },
+
+    downloadPdf: async (taxId: string): Promise<Blob> => {
+        const {data} = await axiosClient.get<Blob>(`/api/products/${taxId}/pdf`, {
+            responseType: 'blob'
+        });
+        return data;
+    },
+
+    emailPdf: async (taxId: string, email: string): Promise<void> => {
+        await axiosClient.get<void>(`/api/products/${taxId}/email`, {
+            params: { email }
+        });
+    },
 };

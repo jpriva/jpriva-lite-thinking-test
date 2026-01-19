@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {Button, Paper, Typography} from '@mui/material';
-import {FormInput} from '../atoms/FormInput';
-import {UserRoleSelector} from '../molecules/UserRoleSelector';
+import {FormInput} from '../atoms';
+import {UserRoleSelector} from '../molecules';
 import {AuthService} from '../../services';
 import type {CreateUserRequest} from "../../types";
 

@@ -4,6 +4,7 @@ import {jwtDecode} from "jwt-decode";
 
 const TOKEN_KEY = "token";
 const ROLE_KEY = "role";
+const EMAIL_KEY = "sub";
 
 export const AuthService = {
     login: async (payload: LoginRequest) => {
@@ -11,7 +12,9 @@ export const AuthService = {
         if (data.accessToken) {
             const decoded = jwtDecode<CustomJwtPayload>(data.accessToken);
             const userRole: string = decoded.roles || decoded.authorities || "EXTERNAL";
+            const email: string = decoded.sub || '';
             localStorage.setItem(ROLE_KEY, userRole);
+            localStorage.setItem(EMAIL_KEY, email);
             localStorage.setItem(TOKEN_KEY, data.accessToken);
             window.location.href = '/companies';
         }
@@ -31,6 +34,10 @@ export const AuthService = {
 
     getToken: () => {
         return localStorage.getItem(TOKEN_KEY);
+    },
+
+    getEmail: () => {
+        return localStorage.getItem(EMAIL_KEY);
     },
 
     isAuthenticated: () => {
