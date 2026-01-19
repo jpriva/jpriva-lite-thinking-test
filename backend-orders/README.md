@@ -1,5 +1,7 @@
 # Lite Thinking Test - Juan Pablo Rivadeneira
 
+# Backend
+
 Este proyecto es un microservicio para la gestión de pedidos (Orders), desarrollado como parte de una prueba técnica. Implementa una arquitectura robusta utilizando las últimas versiones de Java y Spring Boot.
 
 ## Tecnologías Utilizadas
@@ -110,3 +112,24 @@ docker run -p 8080:8080 backend-orders
 
 Esto levantará la aplicación en el puerto 8080.
 
+## AWS
+
+Para el envio de correo con el PDF se realizó una integracion con colas SQS y Lambda con el Payload y el nombre del archivo en S3 para firmarlo y obtener una URL efimera para descargarlo. La Lambda envia el correo por SES. El despliegue se hizo por Terraform por el momento en LocalStack para pruebas.
+
+# Frontend
+
+## Tecnologias
+
+- Typescript 
+- React 
+- Vite
+- MUI Material
+- Axiom
+
+## Metodologia
+
+- Se realizaron algunos componentes con metodologia Atomic Design para garantizar reutilizacion y mantenimiento futuro de los componentes y paginas.
+
+## Dockerización
+
+Se genero el Dockerfile para la construccion de la imagen y despliegue en Nginx
