@@ -75,7 +75,7 @@ export const OrderManagePage = () => {
     if (!order) return <Typography>Loading order...</Typography>;
 
     return (
-        <Box sx={{ p: 3, maxWidth: 1000, margin: '0 auto' }}>
+        <Box component="main" sx={{ p: 3, maxWidth: 1000, margin: '0 auto' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
                 <Button startIcon={<ArrowBackIcon />} onClick={() => navigate(`/orders/${companyId}`)} sx={{ mr: 2 }}>
                     Terminate / Go back

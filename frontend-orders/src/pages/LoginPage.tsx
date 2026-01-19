@@ -46,6 +46,7 @@ export const LoginPage = () => {
 
     return (
         <Box
+            component="main"
             sx={{
                 height: '100vh',
                 display: 'flex',

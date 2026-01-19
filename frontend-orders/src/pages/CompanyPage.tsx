@@ -84,7 +84,7 @@ export const CompanyPage = () => {
     };
 
     return (
-        <Box sx={{ height: 400, width: '100%', p: 2 }}>
+        <Box component="main" sx={{ height: 400, width: '100%', p: 2 }}>
             <Typography variant="h4" gutterBottom>Companies</Typography>
 
             {isAdmin &&

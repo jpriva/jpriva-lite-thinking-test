@@ -82,7 +82,7 @@ export const CategoriesPage = () => {
     ];
 
     return (
-        <Box sx={{ p: 3 }}>
+        <Box component="main" sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, justifyContent: 'space-between' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Button

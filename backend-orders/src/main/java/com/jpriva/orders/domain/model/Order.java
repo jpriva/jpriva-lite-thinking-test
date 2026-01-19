@@ -134,23 +134,31 @@ public class Order {
     }
 
     public void changeItemPrice(UUID itemId, Money price){
-        if (itemId==null){
-            throw new DomainException(OrderErrorCodes.ORDER_ITEM_ID_NULL);
-        }
-        if (price==null){
-            throw new DomainException(OrderErrorCodes.ORDER_PRODUCT_PRICE_NULL);
-        }
-        if (!price.currency().equals(this.totalAmount.currency())){
-            throw new DomainException(OrderErrorCodes.ORDER_ITEM_CURRENCY_MISMATCH);
-        }
+        try {
+            if (itemId == null) {
+                throw new DomainException(OrderErrorCodes.ORDER_ITEM_ID_NULL);
+            }
+            if (price == null) {
+                throw new DomainException(OrderErrorCodes.ORDER_PRODUCT_PRICE_NULL);
+            }
+            if (!price.currency().equals(this.totalAmount.currency())) {
+                throw new DomainException(OrderErrorCodes.ORDER_ITEM_CURRENCY_MISMATCH);
+            }
 
-        OrderItem item = this.items.stream()
-                .filter(i -> i.getId().equals(itemId))
-                .findFirst()
-                .orElseThrow(() -> new DomainException(OrderErrorCodes.ORDER_ITEM_NOT_FOUND));
+            OrderItem item = this.items.stream()
+                    .filter(i -> i.getId().equals(itemId))
+                    .findFirst()
+                    .orElseThrow(() -> new DomainException(OrderErrorCodes.ORDER_ITEM_NOT_FOUND));
 
-        item.changeUnitPrice(price);
-        calculateTotal();
+            item.changeUnitPrice(price);
+            calculateTotal();
+        }catch (NullPointerException e) {
+            throw new DomainException(OrderErrorCodes.ORDER_ITEM_NOT_FOUND);
+        }catch (Exception e){
+
+        } finally {
+            //Hacer otra cosa
+        }
     }
 
     private void calculateTotal() {
