@@ -1,10 +1,16 @@
-export const CURRENCIES = [
+export const CURRENCIES: readonly Currency[] = [
     {code: 'COP', name: 'Colombian Peso', symbol: '$'},
     {code: 'USD', name: 'US Dollar', symbol: '$'},
     {code: 'EUR', name: 'Euro', symbol: '€'},
     {code: 'GBP', name: 'British Pound', symbol: '£'},
     {code: 'JPY', name: 'Japanese Yen', symbol: '¥'}
 ];
+
+export interface Currency {
+    code: string;
+    name: string;
+    symbol: string;
+}
 
 export interface Page<T> {
     content: T[];

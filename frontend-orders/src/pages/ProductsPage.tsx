@@ -3,20 +3,15 @@ import {useNavigate, useParams} from 'react-router-dom';
 import {
     Box,
     Button,
-    Chip,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
-    IconButton,
     MenuItem,
     Paper,
-    Stack,
     TextField,
-    Tooltip,
     Typography
 } from '@mui/material';
-import {DataGrid, type GridColDef, type GridRenderCellParams} from '@mui/x-data-grid';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
@@ -25,10 +20,15 @@ import type {Category, CreateProductRequest, Product} from '../types';
 import {CURRENCIES} from '../types';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
+import {CurrencySelector} from "../components/molecules";
+import {ProductsTable} from "../components/organisms";
 
 export const ProductsPage = () => {
     const {companyId} = useParams();
     const navigate = useNavigate();
+    const [currencyCode, setCurrencyCode] = useState<string>('COP');
+
+    const currentCurrency = CURRENCIES.find(c => c.code === currencyCode) || CURRENCIES[0];
 
     const isAdmin: boolean = AuthService.isAuthenticated() && AuthService.isAdmin();
 
@@ -147,105 +147,6 @@ export const ProductsPage = () => {
         }
     };
 
-    const columns: GridColDef[] = [
-        {field: 'sku', headerName: 'SKU', width: 120, minWidth: 100},
-        {field: 'name', headerName: 'Product Name', flex: 1.5, minWidth: 150},
-        {
-            field: 'stockQuantity',
-            headerName: 'Stock',
-            width: 130,
-            renderCell: (params) => (
-                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                    <Typography
-                        fontWeight="bold"
-                        color={params.value < 10 ? 'error.main' : 'success.main'}
-                    >
-                        {params.value}
-                    </Typography>
-
-                    {isAdmin &&
-                        <Tooltip title="Add Stock">
-                            <IconButton
-                                size="small"
-                                color="primary"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleOpenStock(params.row.id);
-                                }}
-                            >
-                                <AddIcon fontSize="small"/>
-                            </IconButton>
-                        </Tooltip>}
-                </Box>
-            )
-        },
-        {
-            field: 'prices',
-            headerName: 'Prices',
-            flex: 2,
-            minWidth: 250,
-            renderCell: (params: GridRenderCellParams) => {
-                const pricesMap = params.value as Record<string, number>;
-
-                return (
-                    <Box sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        height: '100%',
-                        width: '100%',
-                        overflow: 'hidden'
-                    }}>
-                        <Stack
-                            direction="row"
-                            spacing={1}
-                            sx={{
-                                overflowX: 'auto',
-                                width: '100%',
-                                pb: '4px',
-                                '&::-webkit-scrollbar': {height: '6px'},
-                                '&::-webkit-scrollbar-thumb': {backgroundColor: '#e0e0e0', borderRadius: '10px'}
-                            }}
-                        >
-                            {pricesMap && Object.entries(pricesMap).map(([code, amount]) => {
-                                const currencyInfo = CURRENCIES.find(c => c.code === code);
-
-                                const symbol = currencyInfo ? currencyInfo.symbol : code;
-
-                                const tooltipText = currencyInfo
-                                    ? `${currencyInfo.code} - ${currencyInfo.name}`
-                                    : code;
-
-                                return (
-                                    <Tooltip key={code} title={tooltipText} arrow placement="top">
-                                        <Chip
-                                            label={`${symbol} ${amount.toLocaleString()}`}
-                                            size="small"
-                                            variant="outlined"
-                                            sx={{backgroundColor: '#fff', cursor: 'help'}}
-                                        />
-                                    </Tooltip>
-                                );
-                            })}
-                        </Stack>
-                        {isAdmin &&
-                            <Tooltip title="Update Price">
-                                <IconButton
-                                    size="small"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleOpenPrice(params.row.id);
-                                    }}
-                                >
-                                    <EditIcon fontSize="small"/>
-                                </IconButton>
-                            </Tooltip>}
-                    </Box>
-                );
-            }
-        },
-        {field: 'description', headerName: 'Description', flex: 1, minWidth: 150},
-    ];
-
     return (
         <Box component="main" sx={{p: 3}}>
             <Box sx={{display: 'flex', alignItems: 'center', mb: 3, justifyContent: 'space-between'}}>
@@ -255,6 +156,14 @@ export const ProductsPage = () => {
                     </Button>
                     <Typography variant="h4">Products Inventory</Typography>
                 </Box>
+                <CurrencySelector
+                    value={currencyCode}
+                    onChange={(newCode) => setCurrencyCode(newCode)}
+                    fullWidth
+                    variant="outlined"
+                    margin="normal"
+                    sx={{width: '300px'}}
+                />
                 {isAdmin &&
                     <Button
                         variant="contained"
@@ -266,14 +175,13 @@ export const ProductsPage = () => {
             </Box>
 
             <Paper sx={{height: 500, width: '100%'}}>
-                <DataGrid
-                    rows={rows}
-                    columns={columns}
-                    loading={loading}
-                    getRowId={(row) => row.id}
-                    initialState={{pagination: {paginationModel: {pageSize: 10}}}}
-                    pageSizeOptions={[10, 20]}
-                    disableRowSelectionOnClick
+                <ProductsTable
+                    products={rows}
+                    selectedCurrency={currentCurrency}
+                    isAdmin={AuthService.isAdmin()}
+                    isLoading={loading}
+                    handleOpenPrice={handleOpenPrice}
+                    handleOpenStock={handleOpenStock}
                 />
             </Paper>
 
