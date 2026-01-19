@@ -5,10 +5,13 @@ import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import CategoryIcon from '@mui/icons-material/Category';
 import GroupsIcon from '@mui/icons-material/Groups';
 import {AuthService} from "../../services";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
+import BusinessIcon from '@mui/icons-material/Business';
 
 export const Navbar = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const isAdmin = AuthService.isAdmin();
 
     const match = matchPath(
         {path: "/:section/:companyId/*"},
@@ -34,8 +37,19 @@ export const Navbar = () => {
                         {companyId ? "⬅ Return to companies" : "ORDERS"}
                     </Typography>
 
-                    {companyId && (
-                        <Box sx={{mr: 2, display: 'flex', gap: 1}}>
+                    <Box sx={{mr: 2, display: 'flex', gap: 1}}>
+
+                        {!companyId && !location.pathname.includes('/companies') && isAdmin &&
+                            <Button
+                                color="inherit"
+                                startIcon={<BusinessIcon/>}
+                                onClick={() => navigate(`/companies`)}
+                            >
+                                Companies
+                            </Button>
+                        }
+
+                        {companyId &&
                             <Button
                                 color="inherit"
                                 startIcon={<ShoppingBagIcon/>}
@@ -44,7 +58,8 @@ export const Navbar = () => {
                             >
                                 Orders
                             </Button>
-
+                        }
+                        {companyId &&
                             <Button
                                 color="inherit"
                                 startIcon={<InventoryIcon/>}
@@ -53,7 +68,8 @@ export const Navbar = () => {
                             >
                                 Products
                             </Button>
-
+                        }
+                        {companyId &&
                             <Button
                                 color="inherit"
                                 startIcon={<CategoryIcon/>}
@@ -62,7 +78,8 @@ export const Navbar = () => {
                             >
                                 Categories
                             </Button>
-
+                        }
+                        {companyId &&
                             <Button
                                 color="inherit"
                                 startIcon={<GroupsIcon/>}
@@ -70,9 +87,18 @@ export const Navbar = () => {
                                 sx={{borderBottom: location.pathname.includes('/clients') ? '2px solid white' : 'none'}}
                             >
                                 Clients
+                            </Button>}
+                        {isAdmin &&
+                            <Button
+                                color="inherit"
+                                startIcon={<PersonAddIcon/>}
+                                onClick={() => navigate('/register')}
+                                sx={{borderBottom: location.pathname.includes('/register') ? '2px solid white' : 'none'}}
+                            >
+                                Register User
                             </Button>
-                        </Box>
-                    )}
+                        }
+                    </Box>
 
                     <Button color="error" variant="contained" size="small" onClick={handleLogout}>
                         Logout

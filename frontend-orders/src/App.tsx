@@ -7,9 +7,12 @@ import {ProductsPage} from "./pages/ProductsPage.tsx";
 import {CategoriesPage} from "./pages/CategoriesPage.tsx";
 import {ClientsPage} from "./pages/ClientsPage.tsx";
 import {OrderManagePage} from "./pages/OrderManagePage.tsx";
+import {AuthService} from "./services";
+import {AdminRegistrationPage} from "./pages/AdminRegistrationPage.tsx";
 
 function App() {
-    const isAuthenticated = !!localStorage.getItem('token');
+    const isAuthenticated = AuthService.isAuthenticated();
+    const isAdmin = AuthService.isAdmin();
 
     return (
         <Routes>
@@ -24,6 +27,7 @@ function App() {
                 <Route path="/products/:companyId" element={isAuthenticated ? <ProductsPage/> : <Navigate to="/login"/>}/>
                 <Route path="/categories/:companyId" element={isAuthenticated ? <CategoriesPage/> : <Navigate to="/login"/>}/>
                 <Route path="/clients/:companyId" element={isAuthenticated ? <ClientsPage/> : <Navigate to="/login"/>}/>
+                <Route path="/register" element={isAuthenticated ? (isAdmin ? <AdminRegistrationPage/> : <Navigate to="/companies"/>) : <Navigate to="/login"/>}/>
 
             </Route>
             <Route path="*" element={<Navigate to={isAuthenticated ? "/companies" : "/login"}/>}/>
