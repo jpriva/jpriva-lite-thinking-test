@@ -1,5 +1,6 @@
 package com.jpriva.orders.application.usecase;
 
+import com.jpriva.orders.application.dto.InventoryData;
 import com.jpriva.orders.application.dto.ProductDto;
 import com.jpriva.orders.domain.exceptions.CompanyErrorCodes;
 import com.jpriva.orders.domain.exceptions.DomainException;
@@ -7,6 +8,7 @@ import com.jpriva.orders.domain.exceptions.ProductErrorCodes;
 import com.jpriva.orders.domain.model.Company;
 import com.jpriva.orders.domain.model.Product;
 import com.jpriva.orders.domain.model.vo.Money;
+import com.jpriva.orders.domain.ports.report.ReportGeneratorPort;
 import com.jpriva.orders.domain.ports.repository.CompanyRepository;
 import com.jpriva.orders.domain.ports.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ public class ManageProductUseCase {
 
     private final ProductRepository productRepository;
     private final CompanyRepository companyRepository;
+    private final ReportGeneratorPort reportGenerator;
 
     @Transactional
     public ProductDto.Response createProduct(ProductDto.CreateRequest request) {
@@ -68,5 +71,28 @@ public class ManageProductUseCase {
                 .orElseThrow(()->new DomainException(CompanyErrorCodes.COMPANY_NOT_FOUND));
         List<Product> products = productRepository.findByCompanyId(company.getId());
         return products.stream().map(ProductDto.Response::fromDomain).toList();
+    }
+
+    @Transactional(readOnly = true)
+    protected InventoryData fetchInventoryData(String taxId) {
+        Company company = companyRepository.findByTaxId(taxId)
+                .orElseThrow(() -> new DomainException(CompanyErrorCodes.COMPANY_NOT_FOUND));
+
+        List<Product> products = productRepository.findByCompanyId(company.getId());
+
+        if (products.isEmpty()) {
+            throw new DomainException(ProductErrorCodes.PRODUCT_NO_PRODUCTS,
+                    "Company " + company.getName() + " has no products");
+        }
+
+        String sanitizedName = company.getName().trim().replaceAll("\\s+", "_");
+
+        return new InventoryData(company.getName().trim(), sanitizedName, products);
+    }
+
+    @Transactional(readOnly = true)
+    public byte[] getPdfFile(String taxId) {
+        InventoryData data = fetchInventoryData(taxId);
+        return reportGenerator.generateProductReport(data.products());
     }
 }

@@ -14,6 +14,7 @@ public enum ProductErrorCodes implements ErrorCode {
     PRODUCT_PERSISTENCE_ERROR("PROD_005", "Error persisting product", 500),
     PRODUCT_NOT_FOUND("PROD_006", "Product not found", 404),
     PRODUCT_INVENTORY_NULL("PROD_007", "Product inventory cannot be empty", 400),
+    PRODUCT_NO_PRODUCTS("PROD_008", "Company has no products", 404),
 
     PRODUCT_PRICE_ID_NULL("PROD_PRICE_001", "Product price id cannot be empty", 400),
     PRODUCT_PRICE_NULL("PROD_PRICE_002", "Product price cannot be empty", 400),

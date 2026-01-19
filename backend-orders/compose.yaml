@@ -18,29 +18,30 @@ services:
       start_period: 10s
       timeout: 3s
 
-  app-orders:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: orders-container
+  localstack:
+    image: localstack/localstack
     ports:
-      - "8080:8080"
-    restart: unless-stopped
+      - "4566:4566"
+      - "4510-4559:4510-4559"
     environment:
-      - SERVER_PORT=8080
-      - DB_URL=jdbc:sqlserver://sqlserver:1433;databaseName=master;encrypt=true;trustServerCertificate=true;integratedSecurity=false;authentication=SqlPassword
-      - DB_USERNAME=sa
-      - DB_PASSWORD=VeryS3cret!
-      - HIBERNATE_DDL_AUTO=none
-      - JWT_SECRET=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-      - JWT_EXPIRATION=86400000
-      - DEFAULT_ADMIN_EMAIL=jpriva@outlook.com
-      - DEFAULT_ADMIN_PASSWORD=S3cr3t!
-      - DEFAULT_ADMIN_NAME="Juan Pablo Rivadeneira"
-      - APP_LOG_LEVEL:DEBUG
+      - SERVICES=s3,sqs,lambda,ses,iam,sts
+      - AWS_DEFAULT_REGION=us-east-1
+      - DEBUG=1
+      - LAMBDA_EXECUTOR=docker
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - SMTP_HOST=mailpit:1025
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
     depends_on:
-      sqlserver:
-        condition: service_healthy
+      - mailpit
+    networks:
+      - default
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
 
 volumes:
   sqlserver_data:

@@ -1,6 +1,7 @@
 package com.jpriva.orders.infrastructure.rest.controller;
 
 import com.jpriva.orders.application.dto.ProductDto;
+import com.jpriva.orders.application.usecase.ManageNotificationUseCase;
 import com.jpriva.orders.application.usecase.ManageProductUseCase;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.UUID;
 public class ProductController {
 
     private final ManageProductUseCase manageProductUseCase;
+    private final ManageNotificationUseCase manageNotificationUseCase;
 
     @PostMapping
     public ResponseEntity<ProductDto.Response> createProduct(@RequestBody @Valid ProductDto.CreateRequest request) {
@@ -48,5 +50,17 @@ public class ProductController {
             @RequestParam int amount) {
         ProductDto.Response response = manageProductUseCase.increaseStock(id, amount);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{taxId}/pdf")
+    public ResponseEntity<byte[]> getPdfFile(@PathVariable String taxId) {
+        byte[] pdfReport = manageProductUseCase.getPdfFile(taxId);
+        return ResponseEntity.ok(pdfReport);
+    }
+    @GetMapping("/{taxId}/email")
+    public ResponseEntity<Void> sendInventoryToEmail(@PathVariable String taxId, @RequestParam String email) {
+        manageNotificationUseCase.sendInventoryToEmail(taxId, email);
+        return ResponseEntity.ok().build();
+
     }
 }
