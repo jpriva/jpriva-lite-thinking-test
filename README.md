@@ -79,6 +79,8 @@ El sistema utiliza JSON Web Tokens (JWT) para la seguridad.
 
 - Los endpoints bajo `/api/v1/auth` son públicos.
 - El resto de los endpoints requieren el header: `Authorization: Bearer <token>`.
+- Por defecto el sistema crea el usuario con un email configurado en la variable de entorno `DEFAULT_ADMIN_EMAIL` y contraseña en la variable de entorno `DEFAULT_ADMIN_PASSWORD`, al modificar las variables podra ingresar al sistema.
+- Desde el Usuario Administrador podra crear otros usuarios.
 
 ## Estructura de Endpoints Principales
 
