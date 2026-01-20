@@ -24,7 +24,6 @@ import java.util.List;
 public class ITextPdfAdapter implements ReportGeneratorPort {
     @Override
     public byte[] generateProductReport(List<Product> products) {
-
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             PdfWriter writer = new PdfWriter(out);
             PdfDocument pdf = new PdfDocument(writer);

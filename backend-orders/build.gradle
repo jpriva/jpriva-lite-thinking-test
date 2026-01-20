@@ -48,6 +48,7 @@ dependencies {
 	implementation 'com.itextpdf:layout:9.5.0'
 	implementation 'com.itextpdf:io:9.5.0'
 	//AWS
+	implementation platform('software.amazon.awssdk:bom:2.41.10')
 	implementation 'software.amazon.awssdk:s3'
 	implementation 'software.amazon.awssdk:sqs'
 
@@ -56,7 +57,7 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
-	runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
+	implementation 'com.microsoft.sqlserver:mssql-jdbc'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
@@ -68,6 +69,7 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
 	testImplementation 'org.testcontainers:testcontainers-mssqlserver'
+	testImplementation 'org.testcontainers:testcontainers-localstack'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
@@ -78,6 +80,9 @@ hibernate {
 }
 
 test {
+	useJUnitPlatform()
+	jvmArgs("-agentlib:native-image-agent=config-output-dir=src/main/resources/META-INF/native-image")
+	jvmArgs("-XX:+EnableDynamicAgentLoading")
 	testLogging {
 		events "failed", "skipped"
 
@@ -97,19 +102,23 @@ test {
 			println "==========================================================\n"
 		}
 	}
-	useJUnitPlatform()
 }
 
-tasks.withType(ProcessTestAot).configureEach {
-	enabled = false
-}
+//tasks.withType(ProcessTestAot).configureEach {
+//	enabled = false
+//}
 
 graalvmNative {
 	binaries {
 		main {
 			buildArgs.add("-H:IncludeResources=db/migration/.*")
 			buildArgs.add("-H:+AddAllCharsets")
+			buildArgs.add("-H:IncludeResources=.*\\.ttf\$")
+			buildArgs.add("-H:IncludeResources=.*\\.otf\$")
 			resources.autodetect()
+			buildArgs.add("--initialize-at-build-time=net.bytebuddy")
+            buildArgs.add("--initialize-at-build-time=org.hibernate.bytecode.internal.bytebuddy")
+            buildArgs.add("--initialize-at-build-time=org.hibernate.bytecode.spi.BytecodeProvider")
 		}
 	}
 }

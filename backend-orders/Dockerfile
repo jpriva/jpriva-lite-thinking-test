@@ -1,26 +1,32 @@
-FROM ghcr.io/graalvm/native-image-community:25 AS build
-
+# BASE IMAGE FOR BUILDING THE APPLICATION
+FROM ghcr.io/graalvm/native-image-community:25 AS builder
 WORKDIR /app
+COPY build.gradle settings.gradle gradlew ./
+COPY gradle gradle
+RUN chmod +x gradlew
+RUN ./gradlew dependencies --no-daemon || true
+COPY src src
 
-COPY gradlew .
-COPY gradle ./gradle
-COPY build.gradle .
-COPY settings.gradle .
+# COMPILE JAR
+FROM builder AS build-java
+RUN ./gradlew bootJar -x test --no-daemon
 
-COPY src ./src
+# COMPILE NATIVE IMAGE
+FROM builder AS build-native
+RUN ./gradlew nativeCompile -x test --no-daemon
 
-RUN chmod +x ./gradlew
+# FINAL IMAGE FOR JAVA APPLICATION
+FROM eclipse-temurin:25-jre-alpine AS final-java
+WORKDIR /app
+COPY --from=build-java /app/build/libs/*.jar orders.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "orders.jar"]
 
-RUN ./gradlew nativeCompile
-
-FROM alpine:latest
-
+# FINAL IMAGE FOR NATIVE APPLICATION
+FROM alpine:latest AS final-native
 RUN apk add --no-cache gcompat libc6-compat
-
 WORKDIR /app
-
-COPY --from=build /app/build/native/nativeCompile/orders .
+COPY --from=build-native /app/build/native/nativeCompile/orders .
 
 EXPOSE 8080
-
 ENTRYPOINT ["./orders"]

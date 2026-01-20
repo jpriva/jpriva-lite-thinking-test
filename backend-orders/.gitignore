@@ -38,3 +38,4 @@ out/
 
 # Environment files
 .env
+/src/main/resources/META-INF/native-image/reachability-metadata.json

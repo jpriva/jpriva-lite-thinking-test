@@ -70,7 +70,6 @@ class OrderControllerIntegrationTest {
                 .andReturn();
         adminToken = objectMapper.readTree(loginResult.getResponse().getContentAsString()).get("accessToken").asString();
 
-        // 2. Create Company
         companyRequest = new CompanyDto.CreateRequest(
                 "Test Company for Order",
                 "123456789-0",
@@ -143,7 +142,6 @@ class OrderControllerIntegrationTest {
 
     @Test
     void shouldCreateOrderByAdminSuccessfully() throws Exception {
-        // Arrange
         OrderDto.CreateRequest orderRequest = new OrderDto.CreateRequest(
                 companyRequest.taxId(),
                 clientId,

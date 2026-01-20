@@ -1,3 +1,27 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: Orders
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;databaseName=orders;encrypt=true;trustServerCertificate=true
+    username: sa
+    password: StrongPass123!
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    open-in-view: false
+    database-platform: org.hibernate.dialect.SQLServerDialect
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+    clean-disabled: false
+    url: jdbc:sqlserver://localhost:1433;databaseName=orders;encrypt=true;trustServerCertificate=true
+    user: sa
+    password: StrongPass123!
+    locations: classpath:db/migration
+
 jwt:
   secret: "dGhpc2lzYWxvbmdlcmp3dHNlY3JldGtleWZvcnNlY3VyaXR5cHVycG9zZXN0aGF0aXNhdGxlYXN0MzJieXRlc2xvbmc="
   expiration: 86400000
@@ -9,6 +33,14 @@ app:
       password: "password"
       name: "Test Admin"
 
-spring:
-  flyway:
-    enabled: true
+aws:
+  region: us-east-1
+  s3:
+    bucket: inventory-report
+    endpoint: http://localhost:4566
+  sqs:
+    queue-url: http://localhost:4566/000000000000/notification-pdf-queue
+    queue-name: notification-pdf-queue
+  credentials:
+    access-key: test
+    secret-key: test

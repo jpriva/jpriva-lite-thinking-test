@@ -5,7 +5,7 @@ spring:
   application:
     name: Orders
   datasource:
-    url: ${DB_URL:jdbc:sqlserver://localhost:1433;databaseName=orders;encrypt=true;trustServerCertificate=true}
+    url: ${DB_URL:jdbc:sqlserver://localhost:1433;databaseName=master;encrypt=true;trustServerCertificate=true}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
@@ -16,7 +16,7 @@ spring:
       ddl-auto: ${HIBERNATE_DDL_AUTO:validate}
   flyway:
     enabled: true
-    url: ${DB_URL:jdbc:sqlserver://localhost:1433;databaseName=orders;encrypt=true;trustServerCertificate=true}
+    url: ${DB_URL:jdbc:sqlserver://localhost:1433;databaseName=master;encrypt=true;trustServerCertificate=true}
     user: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     locations: classpath:db/migration
@@ -39,12 +39,12 @@ app:
       name: ${DEFAULT_ADMIN_NAME:Admin}
 
 aws:
-  region: us-east-1
+  region: ${AWS_REGION:us-east-1}
   s3:
     bucket: ${AWS_S3_BUCKET:inventory-report}
-    endpoint: http://localhost:4566
+    endpoint: ${AWS_S3_ENDPOINT}
   sqs:
-    queue-url: http://localhost:4566/000000000000/notification-pdf-queue
+    queue-url: ${AWS_SQS_QUEUE_URL}
   credentials:
-    access-key: test
-    secret-key: test
+    access-key: ${AWS_ACCESS_KEY_ID:test}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:test}

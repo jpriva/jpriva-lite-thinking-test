@@ -1,0 +1,41 @@
+services:
+  backend-orders:
+    image: backend-orders:latest
+    ports:
+      - "8080:${SERVER_PORT}"
+    restart: unless-stopped
+    environment:
+      - SERVER_PORT=${SERVER_PORT}
+      - DB_URL=jdbc:${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - HIBERNATE_DDL_AUTO=${HIBERNATE_DDL_AUTO}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=${JWT_EXPIRATION}
+      - DEFAULT_ADMIN_EMAIL=${DEFAULT_ADMIN_EMAIL}
+      - DEFAULT_ADMIN_PASSWORD=${DEFAULT_ADMIN_PASSWORD}
+      - DEFAULT_ADMIN_NAME=${DEFAULT_ADMIN_NAME}
+      - APP_LOG_LEVEL=${APP_LOG_LEVEL}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_S3_BUCKET=${AWS_S3_BUCKET}
+      - AWS_S3_ENDPOINT=${AWS_S3_ENDPOINT}
+      - AWS_SQS_QUEUE_URL=${AWS_SQS_QUEUE_URL}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    networks:
+      - orders_network
+  
+  frontend-orders:
+    image: frontend-orders:latest
+    ports:
+      - "8099:80"
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=http://backend-orders:${SERVER_PORT}
+    networks:
+      - orders_network
+
+networks:
+  orders_network:
+    external: true
+    name: orders_network
