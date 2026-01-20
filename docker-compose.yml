@@ -1,5 +1,6 @@
 services:
   backend-orders:
+    container_name: backend-orders
     image: backend-orders:latest
     ports:
       - "8080:${SERVER_PORT}"
@@ -26,6 +27,7 @@ services:
       - orders_network
   
   frontend-orders:
+    container_name: frontend-orders
     image: frontend-orders:latest
     ports:
       - "8099:80"
