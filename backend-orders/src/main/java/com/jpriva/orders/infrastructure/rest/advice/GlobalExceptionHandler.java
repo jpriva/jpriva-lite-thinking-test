@@ -131,7 +131,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleMissingServletRequestParameter(NoResourceFoundException ex) {
         log.warn("Path not found: {}", ex.getMessage(), ex);
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(
-                HttpStatus.BAD_REQUEST,
+                HttpStatus.NOT_FOUND,
                 "Path not found: " + ex.getResourcePath()
         );
         problem.setTitle("Invalid Path");

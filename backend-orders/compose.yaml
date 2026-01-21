@@ -34,7 +34,6 @@ services:
       - DOCKER_HOST=unix:///var/run/docker.sock
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "~/tmp/localstack:/tmp/localstack/state"
     networks:
       - orders_network
 
