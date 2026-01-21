@@ -33,8 +33,8 @@ El proyecto sigue un enfoque de **Arquitectura Hexagonal/Limpia**, separando las
 
 ### 1. Clonar el repositorio
 ```bash
-git clone <url-del-repositorio>
-cd backend-orders
+git clone https://github.com/jpriva/jpriva-lite-thinking-test.git
+cd jpriva-lite-thinking-test
 ```
 
 ### 2. Variables de Entorno
@@ -42,32 +42,46 @@ cd backend-orders
 Copia el archivo de ejemplo y ajusta las credenciales si es necesario:
 
 ```bash
-cp .env.example .env
+cp backend-orders/.env.example .env
+cp backend-orders/.env.example backend-orders/.env
 ```
 
 ### 3. Ejecutar con Docker Compose
 
-Este comando levantará la base de datos SQL Server y la aplicación automáticamente:
+En linux, con las dependencias necesarias, este comando levantará la base de datos SQL Server, Localstack y la aplicación automáticamente para pruebas locales:
 
 ```bash
-docker-compose up --build
+./service-up.sh --build
 ```
 Si deseas usar Spring Boot Docker Compose Support (ejecutando solo la BD en Docker y el app local):
 
-- Levanta solo la base de datos:
+- Levanta solo la infraestructura(Sql Server + Localstack):
 ```bash
-docker-compose up sqlserver
+cd backend-orders
+docker-compose up -d
+cd terraform
+terraform init
+terraform apply
 ```
-- Ejecuta el app:
+- Ejecuta el backend:
 ```bash
 ./gradlew bootRun
+```
+- Ejecuta el frontend:
+```bash
+cd ..
+cd frontend-orders
+npm run dev
 ```
 
 ### 4. Compilación nativa con GraalVM
 
-Para compilar el proyecto en una imagen nativa utilizando GraalVM, asegúrate de tener GraalVM instalado y configurado correctamente. Luego, ejecuta:
+Para compilar el proyecto en una imagen nativa utilizando GraalVM, asegúrate de tener GraalVM instalado y configurado correctamente.
+Se requiere ejecutar las pruebas del proyecto para que los agenetes configurados lean las dependencias del proyecto.
+Luego, ejecuta:
 
 ```bash
+./gradlew clean test
 ./gradlew nativeImage
 ```
 
@@ -77,19 +91,19 @@ Esto generará una imagen nativa en el directorio `build/native-image`.
 
 El sistema utiliza JSON Web Tokens (JWT) para la seguridad.
 
-- Los endpoints bajo `/api/v1/auth` son públicos.
+- El endpoint `/auth/login` es público, junto con la documentacion `/swagger-ui/index.html`.
 - El resto de los endpoints requieren el header: `Authorization: Bearer <token>`.
 - Por defecto el sistema crea el usuario con un email configurado en la variable de entorno `DEFAULT_ADMIN_EMAIL` y contraseña en la variable de entorno `DEFAULT_ADMIN_PASSWORD`, al modificar las variables podra ingresar al sistema.
 - Desde el Usuario Administrador podra crear otros usuarios.
 
 ## Estructura de Endpoints Principales
 
-- Auth: POST /api/v1/auth/login, POST /api/v1/auth/register
-- Orders: GET/POST /api/v1/orders
-- Clients: GET/POST /api/v1/clients
-- Products: GET/POST /api/v1/products
-- Companies: GET/POST /api/v1/companies
-- Categories: GET/POST /api/v1/categories
+- Auth: POST /auth/login, POST /auth/register
+- Orders: GET/POST /api/orders
+- Clients: GET/POST /api/clients
+- Products: GET/POST /api/products
+- Companies: GET/POST /api/companies
+- Categories: GET/POST /api/categories
 
 ## Pruebas
 
@@ -99,7 +113,7 @@ Para ejecutar la suite de pruebas (JUnit 5 + Testcontainers):
 ./gradlew test
 ```
 
-El proyecto utiliza Testcontainers para levantar una instancia efímera de SQL Server durante los tests integrales.
+El proyecto utiliza Testcontainers para levantar una instancia efímera de SQL Server y Localstack durante los tests integrales.
 
 ## Dockerización
 
@@ -115,6 +129,123 @@ Esto levantará la aplicación en el puerto 8080.
 ## AWS
 
 Para el envio de correo con el PDF se realizó una integracion con colas SQS y Lambda con el Payload y el nombre del archivo en S3 para firmarlo y obtener una URL efimera para descargarlo. La Lambda envia el correo por SES. El despliegue se hizo por Terraform por el momento en LocalStack para pruebas.
+
+```mermaid
+graph LR
+    %% Definición de Nodos
+    App[Aplicación / Backend]
+    S3[AWS S3 Bucket]
+    SQS[AWS SQS Queue]
+    Lambda[AWS Lambda Function]
+    SES[AWS SES]
+    User((Usuario Final))
+
+    %% Conexiones
+    App -->|1. Sube PDF| S3
+    App -->|2. Envía Payload| SQS
+    SQS -->|3. Trigger| Lambda
+    Lambda -->|4. Crea URL Presignada| S3
+    Lambda -->|5. Envía Correo| SES
+    SES -->|6. Entrega Email| User
+```
+## Base de datos
+
+```mermaid
+erDiagram
+    %% COMPANIES Relationships (Multitenant Root)
+    COMPANIES ||--o{ CATEGORIES : "has"
+    COMPANIES ||--o{ CLIENTS : "manages"
+    COMPANIES ||--o{ PRODUCTS : "sells"
+    COMPANIES ||--o{ ORDERS : "processes"
+
+    %% CATEGORIES Relationships
+    CATEGORIES ||--o{ PRODUCTS : "classifies"
+
+    %% CLIENTS Relationships
+    CLIENTS ||--o{ ORDERS : "places"
+
+    %% PRODUCTS Relationships
+    PRODUCTS ||--o| INVENTORY : "tracks stock"
+    PRODUCTS ||--o{ PRODUCT_PRICES : "has prices (currencies)"
+    PRODUCTS ||--o{ ORDER_ITEMS : "referenced in"
+
+    %% ORDERS Relationships
+    ORDERS ||--|{ ORDER_ITEMS : "contains details"
+
+    %% USERS Table (No explicit FK in script)
+    
+    %% Entity Definitions
+    COMPANIES {
+        uniqueidentifier id PK
+        nvarchar name
+        nvarchar tax_id UK
+        nvarchar address
+        datetime2 created_at
+    }
+
+    USERS {
+        uniqueidentifier id PK
+        nvarchar email UK
+        nvarchar password_hash
+        nvarchar full_name
+        nvarchar role
+    }
+
+    CATEGORIES {
+        uniqueidentifier id PK
+        uniqueidentifier company_id FK
+        nvarchar name
+        nvarchar description
+    }
+
+    CLIENTS {
+        uniqueidentifier id PK
+        uniqueidentifier company_id FK
+        nvarchar name
+        nvarchar email
+        nvarchar phone
+    }
+
+    PRODUCTS {
+        uniqueidentifier id PK
+        uniqueidentifier company_id FK
+        uniqueidentifier category_id FK
+        nvarchar name
+        nvarchar sku
+        nvarchar description
+    }
+
+    INVENTORY {
+        uniqueidentifier id PK
+        uniqueidentifier product_id FK
+        int quantity
+        datetime2 last_updated
+    }
+
+    PRODUCT_PRICES {
+        uniqueidentifier id PK
+        uniqueidentifier product_id FK
+        nvarchar currency_code
+        decimal price
+    }
+
+    ORDERS {
+        uniqueidentifier id PK
+        uniqueidentifier company_id FK
+        uniqueidentifier client_id FK
+        nvarchar status
+        nvarchar currency_code
+        decimal total_amount
+    }
+
+    ORDER_ITEMS {
+        uniqueidentifier id PK
+        uniqueidentifier order_id FK
+        uniqueidentifier product_id FK
+        int quantity
+        decimal unit_price
+    }
+```
 
 # Frontend
 

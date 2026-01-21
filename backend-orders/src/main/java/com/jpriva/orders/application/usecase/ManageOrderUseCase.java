@@ -25,7 +25,6 @@ public class ManageOrderUseCase {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
-    private final UserRepository userRepository;
     private final ClientRepository clientRepository;
     private final CompanyRepository companyRepository;
 

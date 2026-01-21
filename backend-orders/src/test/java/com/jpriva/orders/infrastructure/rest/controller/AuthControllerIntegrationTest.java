@@ -8,10 +8,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -30,6 +32,7 @@ class AuthControllerIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Test
+    @WithMockUser(authorities = "ROLE_ADMIN")
     void shouldRegisterUserSuccessfully() throws Exception {
         UserDto.CreateRequest userRequest = new UserDto.CreateRequest(
                 "test.user@example.com",
@@ -60,6 +63,7 @@ class AuthControllerIntegrationTest {
                 "ADMIN"
         );
         mockMvc.perform(post("/auth/register")
+                        .with(user("admin").roles("ADMIN"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userRequest)))
                 .andExpect(status().isCreated());

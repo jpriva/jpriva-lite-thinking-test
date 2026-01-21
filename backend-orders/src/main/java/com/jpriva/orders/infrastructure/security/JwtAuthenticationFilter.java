@@ -1,13 +1,11 @@
 package com.jpriva.orders.infrastructure.security;
 
-import com.jpriva.orders.infrastructure.rest.advice.GlobalExceptionHandler;
 import com.jpriva.orders.infrastructure.security.adapter.JwtServiceAdapter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
