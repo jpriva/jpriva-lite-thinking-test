@@ -1,32 +1,44 @@
-import {CURRENCIES} from "../../types";
+import {CURRENCIES, type Currency, getCurrencySafe, type Product} from "../../types";
 import {Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField} from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import {useState} from "react";
 import {ProductService} from "../../services";
+import type {Dispatch, SetStateAction} from "react";
+import {PriceEditor} from "../atoms";
 
 type UpdateProductPriceDialogProps = {
+    priceData: {
+        price: string;
+        currencyCode: string;
+    };
+    setPriceData: Dispatch<SetStateAction<{ price: string; currencyCode: string }>>;
     open: boolean;
     onClose: () => void;
+    onChangeCurrency: (currencyCode: string) => void;
     companyId: string | undefined;
-    selectedProductId: string;
+    selectedProduct: Product;
+    initialCurrency: Currency;
     fetchProducts: () => Promise<void>;
 }
 
-export const UpdateProductPriceDialog = ({open, onClose, selectedProductId, fetchProducts}:UpdateProductPriceDialogProps) => {
+export const UpdateProductPriceDialog = ({
+                                             open,
+                                             priceData,
+                                             setPriceData,
+                                             onClose,
+                                             onChangeCurrency,
+                                             selectedProduct,
+                                             fetchProducts
+                                         }: UpdateProductPriceDialogProps) => {
 
-    const [priceData, setPriceData] = useState({
-        price: '',
-        currencyCode: 'COP'
-    });
 
     const handleSavePrice = async () => {
-        if (!selectedProductId || !priceData.price || Number(priceData.price) <= 0) {
+        if (!selectedProduct || !priceData.price || Number(priceData.price) <= 0) {
             alert("Invalid price. Please enter a positive number greater than 0.");
             return;
         }
 
         try {
-            await ProductService.updatePrice(selectedProductId, {
+            await ProductService.updatePrice(selectedProduct.id, {
                 price: Number(priceData.price),
                 currencyCode: priceData.currencyCode
             });
@@ -50,26 +62,19 @@ export const UpdateProductPriceDialog = ({open, onClose, selectedProductId, fetc
                         label="Currency"
                         fullWidth
                         value={priceData.currencyCode}
-                        onChange={(e) => setPriceData({...priceData, currencyCode: e.target.value})}
+                        onChange={(e) => onChangeCurrency(e.target.value)}
                     >
                         {CURRENCIES.map((option) => (
                             <MenuItem key={option.code} value={option.code}>
-                                {/* Se verá así: "USD - US Dollar ($)" */}
                                 {option.code} - {option.name} ({option.symbol})
                             </MenuItem>
                         ))}
                     </TextField>
-
-                    <TextField
+                    <PriceEditor
                         autoFocus
-                        label="New Price"
-                        type="number"
-                        fullWidth
+                        currency={getCurrencySafe(priceData.currencyCode)}
                         value={priceData.price}
-                        onChange={(e) => setPriceData({...priceData, price: e.target.value})}
-                        slotProps={{
-                            htmlInput: {min: 0}
-                        }}
+                        onChange={(val) => setPriceData({...priceData, price: val})}
                     />
                 </Box>
             </DialogContent>

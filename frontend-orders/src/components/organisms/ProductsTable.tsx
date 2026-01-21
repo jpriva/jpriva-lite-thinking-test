@@ -9,8 +9,8 @@ interface Props {
     selectedCurrency: Currency;
     isAdmin: boolean;
     isLoading: boolean;
-    handleOpenPrice: (id: string) => void;
-    handleOpenStock: (id: string) => void;
+    handleOpenPrice: (product: Product) => void;
+    handleOpenStock: (product: Product) => void;
 }
 
 export const ProductsTable = ({
@@ -33,7 +33,7 @@ export const ProductsTable = ({
                 <StockCell
                     value={params.value}
                     showAction={isAdmin}
-                    onAddStock={() => handleOpenStock(params.row.id)}
+                    onAddStock={() => handleOpenStock(params.row)}
                 />
             )
         },
@@ -47,7 +47,7 @@ export const ProductsTable = ({
                     prices={params.value}
                     currency={selectedCurrency}
                     showAction={isAdmin}
-                    onUpdatePrice={() => handleOpenPrice(params.row.id)}
+                    onUpdatePrice={() => handleOpenPrice(params.row)}
                 />
             )
         },

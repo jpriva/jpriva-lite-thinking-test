@@ -1,16 +1,28 @@
+export interface Currency {
+    code: string;
+    name: string;
+    symbol: string;
+}
+
 export const CURRENCIES: readonly Currency[] = [
     {code: 'COP', name: 'Colombian Peso', symbol: '$'},
     {code: 'USD', name: 'US Dollar', symbol: '$'},
     {code: 'EUR', name: 'Euro', symbol: '€'},
     {code: 'GBP', name: 'British Pound', symbol: '£'},
     {code: 'JPY', name: 'Japanese Yen', symbol: '¥'}
-];
+] as const;
 
-export interface Currency {
-    code: string;
-    name: string;
-    symbol: string;
-}
+export const DEFAULT_CURRENCY: Currency = CURRENCIES[0];
+
+export const CURRENCY_MAP: Record<string, Currency> = CURRENCIES.reduce((acc, curr) => {
+    acc[curr.code] = curr;
+    return acc;
+}, {} as Record<string, Currency>);
+
+export const getCurrencySafe = (code: string | undefined | null): Currency => {
+    if (!code) return DEFAULT_CURRENCY;
+    return CURRENCY_MAP[code] || DEFAULT_CURRENCY;
+};
 
 export interface Page<T> {
     content: T[];
